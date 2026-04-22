@@ -1,0 +1,196 @@
+/* ==========================================================================
+   Двойник — Colors & Type
+   shadcn/ui · style: nova · base: zinc · theme: blue · chart: orange
+   ========================================================================== */
+
+/* ---------- Fonts ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ==========================================================================
+   COLOR TOKENS
+   Base: zinc (shadcn) — cooler neutral than the default
+   Primary theme: blue (shadcn) — oklch(0.623 0.214 259.815)
+   Charts: orange ramp (warm, monochromatic)
+   ========================================================================== */
+
+:root {
+  /* --- Zinc neutrals (shadcn "zinc" base, light) --- */
+  --background:            oklch(1 0 0);               /* #ffffff */
+  --foreground:            oklch(0.141 0.005 285.823); /* zinc-950 */
+
+  --card:                  oklch(1 0 0);
+  --card-foreground:       oklch(0.141 0.005 285.823);
+
+  --popover:               oklch(1 0 0);
+  --popover-foreground:    oklch(0.141 0.005 285.823);
+
+  /* --- Primary: shadcn "blue" theme --- */
+  --primary:               oklch(0.623 0.214 259.815); /* blue-600 */
+  --primary-foreground:    oklch(0.970 0.014 254.604); /* blue-50  */
+
+  --secondary:             oklch(0.967 0.001 286.375); /* zinc-100 */
+  --secondary-foreground:  oklch(0.210 0.006 285.885); /* zinc-900 */
+
+  --muted:                 oklch(0.967 0.001 286.375);
+  --muted-foreground:      oklch(0.552 0.016 285.938); /* zinc-500 */
+
+  --accent:                oklch(0.967 0.001 286.375);
+  --accent-foreground:     oklch(0.210 0.006 285.885);
+
+  --destructive:           oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  --border:                oklch(0.920 0.004 286.320); /* zinc-200 */
+  --input:                 oklch(0.920 0.004 286.320);
+  --ring:                  oklch(0.623 0.214 259.815); /* blue-600 — nova: ring uses primary */
+
+  /* Brand alias = primary for convenience */
+  --brand:                 oklch(0.623 0.214 259.815);
+  --brand-foreground:      oklch(0.970 0.014 254.604);
+  --brand-muted:           oklch(0.932 0.032 255.585); /* blue-100 */
+
+  /* --- Status / semantic --- */
+  --status-ok:             oklch(0.648 0.150 160.118); /* emerald-600 */
+  --status-warn:           oklch(0.769 0.188 70.080);  /* amber-500  */
+  --status-crit:           oklch(0.577 0.245 27.325);  /* red-600    */
+  --status-info:           oklch(0.623 0.214 259.815); /* blue-600   */
+  --status-inactive:       oklch(0.705 0.015 286.067); /* zinc-400   */
+
+  /* --- Chart palette: ORANGE monochromatic ramp (shadcn "orange" charts) --- */
+  --chart-1:               oklch(0.646 0.222 41.116);  /* orange-600 — hero */
+  --chart-2:               oklch(0.750 0.183 55.934);  /* orange-400 */
+  --chart-3:               oklch(0.837 0.128 66.290);  /* orange-300 */
+  --chart-4:               oklch(0.554 0.195 38.402);  /* orange-700 */
+  --chart-5:               oklch(0.408 0.153 36.889);  /* orange-800 */
+
+  /* --- Sidebar --- */
+  --sidebar:               oklch(0.985 0 0);
+  --sidebar-foreground:    oklch(0.141 0.005 285.823);
+  --sidebar-primary:       oklch(0.623 0.214 259.815);
+  --sidebar-primary-foreground: oklch(0.970 0.014 254.604);
+  --sidebar-accent:        oklch(0.967 0.001 286.375);
+  --sidebar-accent-foreground: oklch(0.210 0.006 285.885);
+  --sidebar-border:        oklch(0.920 0.004 286.320);
+  --sidebar-ring:          oklch(0.623 0.214 259.815);
+
+  /* --- Radius — nova style (slightly larger than default) --- */
+  --radius-sm:  0.5rem;     /* 8px  */
+  --radius:     0.625rem;   /* 10px — nova default */
+  --radius-md:  0.75rem;    /* 12px */
+  --radius-lg:  1rem;       /* 16px */
+  --radius-xl:  1.25rem;    /* 20px */
+
+  /* --- Shadows (nova: slightly richer) --- */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.10), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+  --shadow:    0 4px 8px -2px rgb(0 0 0 / 0.10), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --shadow-md: 0 10px 20px -4px rgb(0 0 0 / 0.10), 0 4px 8px -4px rgb(0 0 0 / 0.06);
+  --shadow-lg: 0 24px 40px -8px rgb(0 0 0 / 0.14), 0 8px 14px -8px rgb(0 0 0 / 0.08);
+
+  /* --- Spacing (Tailwind-aligned) --- */
+  --space-0: 0; --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+  --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem;
+  --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
+
+  /* ==========================================================================
+     TYPOGRAPHY
+     ========================================================================== */
+  --font-sans:    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  --text-xs:.75rem; --text-sm:.875rem; --text-base:1rem; --text-lg:1.125rem;
+  --text-xl:1.25rem; --text-2xl:1.5rem; --text-3xl:1.875rem; --text-4xl:2.25rem;
+  --text-5xl:3rem; --text-6xl:3.75rem;
+
+  --fw-regular:400; --fw-medium:500; --fw-semi:600; --fw-bold:700; --fw-extra:800;
+
+  --lh-tight:1.1; --lh-snug:1.25; --lh-normal:1.5; --lh-relaxed:1.625;
+
+  --tracking-tight:-0.02em; --tracking-snug:-0.01em; --tracking-normal:0;
+  --tracking-wide:0.02em; --tracking-widest:0.12em;
+}
+
+/* ==========================================================================
+   DARK MODE — zinc dark + blue primary (shadcn)
+   ========================================================================== */
+.dark, [data-theme="dark"] {
+  --background:            oklch(0.141 0.005 285.823);
+  --foreground:            oklch(0.985 0 0);
+
+  --card:                  oklch(0.210 0.006 285.885);
+  --card-foreground:       oklch(0.985 0 0);
+
+  --popover:               oklch(0.210 0.006 285.885);
+  --popover-foreground:    oklch(0.985 0 0);
+
+  --primary:               oklch(0.546 0.245 262.881); /* blue-500 dark */
+  --primary-foreground:    oklch(0.985 0 0);            /* white text on primary */
+
+  --secondary:             oklch(0.274 0.006 286.033);
+  --secondary-foreground:  oklch(0.985 0 0);
+
+  --muted:                 oklch(0.274 0.006 286.033);
+  --muted-foreground:      oklch(0.705 0.015 286.067);
+
+  --accent:                oklch(0.274 0.006 286.033);
+  --accent-foreground:     oklch(0.985 0 0);
+
+  --destructive:           oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  --border:                oklch(1 0 0 / 10%);
+  --input:                 oklch(1 0 0 / 15%);
+  --ring:                  oklch(0.488 0.243 264.376);
+
+  --brand:                 oklch(0.546 0.245 262.881);
+  --brand-foreground:      oklch(0.985 0 0);
+  --brand-muted:           oklch(0.282 0.091 267.935);
+
+  --chart-1:               oklch(0.646 0.222 41.116);
+  --chart-2:               oklch(0.750 0.183 55.934);
+  --chart-3:               oklch(0.837 0.128 66.290);
+  --chart-4:               oklch(0.554 0.195 38.402);
+  --chart-5:               oklch(0.408 0.153 36.889);
+
+  --sidebar:               oklch(0.210 0.006 285.885);
+  --sidebar-foreground:    oklch(0.985 0 0);
+  --sidebar-primary:       oklch(0.546 0.245 262.881);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent:        oklch(0.274 0.006 286.033);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border:        oklch(1 0 0 / 10%);
+  --sidebar-ring:          oklch(0.488 0.243 264.376);
+}
+
+/* ==========================================================================
+   SEMANTIC ELEMENT STYLES
+   ========================================================================== */
+html, body {
+  font-family: var(--font-sans); font-size: var(--text-base); line-height: var(--lh-normal);
+  color: var(--foreground); background: var(--background);
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+
+h1, .h1 { font-family: var(--font-display); font-size: var(--text-5xl); font-weight: var(--fw-extra); line-height: var(--lh-tight); letter-spacing: var(--tracking-tight); }
+h2, .h2 { font-family: var(--font-display); font-size: var(--text-3xl); font-weight: var(--fw-bold); line-height: var(--lh-snug); letter-spacing: var(--tracking-snug); }
+h3, .h3 { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: var(--fw-semi); line-height: var(--lh-snug); letter-spacing: var(--tracking-snug); }
+h4, .h4 { font-family: var(--font-sans); font-size: var(--text-xl); font-weight: var(--fw-semi); line-height: var(--lh-snug); }
+h5, .h5 { font-family: var(--font-sans); font-size: var(--text-lg); font-weight: var(--fw-semi); line-height: var(--lh-snug); }
+
+p, .p { font-size: var(--text-base); line-height: var(--lh-normal); color: var(--foreground); }
+.lead { font-size: var(--text-lg); color: var(--muted-foreground); line-height: var(--lh-relaxed); }
+.small { font-size: var(--text-sm); color: var(--muted-foreground); }
+.muted { color: var(--muted-foreground); }
+
+.eyebrow {
+  font-family: var(--font-sans); font-size: var(--text-xs); font-weight: var(--fw-semi);
+  letter-spacing: var(--tracking-widest); text-transform: uppercase; color: var(--muted-foreground);
+}
+
+code, kbd, .mono {
+  font-family: var(--font-mono); font-size: 0.92em; background: var(--muted);
+  padding: 0.125rem 0.375rem; border-radius: var(--radius-sm);
+}
+
+.num-tabular { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }

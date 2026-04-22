@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Двойник — Operator Console</title>
+<script>
+  (function () {
+    var stored = localStorage.getItem('dvoynik-theme');
+    var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (dark) document.documentElement.classList.add('dark');
+  })();
+</script>
+<link rel="stylesheet" href="./colors_and_type.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css">
+<style>
+  html, body, #root { height: 100%; margin: 0; }
+  body { overflow: hidden; }
+
+  @keyframes map-pulse {
+    0%, 100% { opacity: .35; transform: scale(1); }
+    50%       { opacity: 0;   transform: scale(1.65); }
+  }
+
+  /* MapLibre popup — override with design tokens */
+  .maplibregl-popup-content {
+    background: var(--popover) !important;
+    color: var(--popover-foreground) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: var(--shadow-lg) !important;
+    padding: 0 !important;
+    font-family: var(--font-sans) !important;
+  }
+  .maplibregl-popup-tip { display: none !important; }
+
+  /* MapLibre zoom controls */
+  .maplibregl-ctrl-group {
+    background: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    box-shadow: var(--shadow-sm) !important;
+    overflow: hidden;
+  }
+  .maplibregl-ctrl-group button { background: transparent !important; }
+  .maplibregl-ctrl-group button + button { border-top: 1px solid var(--border) !important; }
+  .maplibregl-ctrl-group button:hover { background: var(--accent) !important; }
+  .dark .maplibregl-ctrl-icon { filter: invert(1) !important; }
+  .maplibregl-ctrl-attrib { display: none !important; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script type="text/babel" src="Primitives.jsx"></script>
+<script type="text/babel" src="Sidebar.jsx"></script>
+<script type="text/babel" src="Topbar.jsx"></script>
+<script type="text/babel" src="KpiStrip.jsx"></script>
+<script type="text/babel" src="ViewerCanvas.jsx"></script>
+<script type="text/babel" src="InspectorPanel.jsx"></script>
+<script type="text/babel" src="AssetRegistry.jsx"></script>
+<script type="text/babel" src="Portfolio.jsx"></script>
+<script type="text/babel" src="Shell.jsx"></script>
+<script type="text/babel" data-presets="react">
+  ReactDOM.createRoot(document.getElementById('root')).render(<Shell />);
+</script>
+</body>
+</html>
