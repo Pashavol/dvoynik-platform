@@ -64,15 +64,26 @@ const MOCK_PROPS = {
     ],
   },
   'E-4401': {
-    name: 'Теплообменник', type: 'Аппарат', status: 'inactive',
-    props: [['Тег', 'E-4401'], ['Площадь, м²', '1 240']],
-    deviations: [],
+    name: 'Теплообменник', type: 'Аппарат', status: 'crit',
+    props: [
+      ['Тег', 'E-4401'],
+      ['Площадь теплообмена, м²', '1 240'],
+      ['Тип', 'Кожухотрубный'],
+      ['Рабочее давление, МПа', '2,1'],
+      ['Температура среды, °C', '240'],
+      ['Материал корпуса', '12Х18Н10Т'],
+      ['Подрядчик', 'ПКБ-3'],
+    ],
+    deviations: [
+      { text: 'Трещина в сварном шве', date: '23.04', kind: 'crit' },
+    ],
     docs: [
       { type: 'PDF', name: 'Паспорт E-4401', date: '20.11.2025', author: 'ОТК', size: '1,8 МБ' },
     ],
     history: [
-      { date: '20.11.2025', kind: 'ok', text: 'Объект переведён в статус «Завершён»', author: 'Система' },
-      { date: '01.10.2025', kind: 'ok', text: 'Объект создан, импортирован из IFC', author: 'Импорт' },
+      { date: '23.04.2026', kind: 'crit', text: 'Критическое расхождение: трещина в сварном шве', author: 'Система' },
+      { date: '20.11.2025', kind: 'ok',   text: 'Объект переведён в статус «Завершён»', author: 'Система' },
+      { date: '01.10.2025', kind: 'ok',   text: 'Объект создан, импортирован из IFC', author: 'Импорт' },
     ],
   },
 };
@@ -135,7 +146,7 @@ const InspectorPanel = ({ selected, onClose }) => {
           <div style={{ marginTop: 8 }}>
             <Badge variant={data.status} uppercase>
               <StatusDot kind={data.status} />
-              {data.status === 'ok' ? 'Активен' : data.status === 'warn' ? 'Внимание' : 'Офлайн'}
+              {data.status === 'ok' ? 'Активен' : data.status === 'warn' ? 'Внимание' : data.status === 'crit' ? 'Проблема' : 'Офлайн'}
             </Badge>
           </div>
         </div>
@@ -166,15 +177,24 @@ const InspectorPanel = ({ selected, onClose }) => {
             {data.deviations.length > 0 && (
               <div style={{ padding: '0 20px 20px' }}>
                 <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted-foreground)', marginBottom: 10 }}>Расхождения</div>
-                {data.deviations.map((d, i) => (
-                  <div key={i} style={{ padding: 12, border: '1px solid var(--border)', borderRadius: 'var(--radius)', marginBottom: 8, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                    <div style={{ marginTop: 3, flexShrink: 0 }}><StatusDot kind="warn" size={8} /></div>
-                    <div style={{ flex: 1, fontSize: 13 }}>
-                      <div>{d.text}</div>
-                      <div style={{ fontSize: 11, color: 'var(--muted-foreground)', marginTop: 2, fontFamily: 'var(--font-mono)' }}>{d.date}.2026</div>
+                {data.deviations.map((d, i) => {
+                  const isCrit = d.kind === 'crit';
+                  return (
+                    <div key={i} style={{
+                      padding: 12, borderRadius: 'var(--radius)', marginBottom: 8,
+                      display: 'flex', gap: 10, alignItems: 'flex-start',
+                      border: `1px solid ${isCrit ? 'color-mix(in oklch, var(--status-crit) 40%, transparent)' : 'var(--border)'}`,
+                      background: isCrit ? 'color-mix(in oklch, var(--status-crit) 6%, transparent)' : 'transparent',
+                    }}>
+                      <div style={{ marginTop: 3, flexShrink: 0 }}><StatusDot kind={d.kind || 'warn'} size={8} /></div>
+                      <div style={{ flex: 1, fontSize: 13 }}>
+                        <div style={{ fontWeight: isCrit ? 600 : 400 }}>{d.text}</div>
+                        <div style={{ fontSize: 11, color: 'var(--muted-foreground)', marginTop: 2, fontFamily: 'var(--font-mono)' }}>{d.date}.2026</div>
+                      </div>
+                      {isCrit && <Badge variant="crit" uppercase>Критично</Badge>}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </>

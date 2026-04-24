@@ -14,27 +14,27 @@ const ThemeToggle = () => {
   );
 };
 
-const Topbar = ({ project, onToggleSidebar, onBackToPortfolio }) => (
+const Topbar = ({ crumbs = [], onToggleSidebar }) => (
   <header style={{
     height: 56, background: 'var(--background)', borderBottom: '1px solid var(--border)',
     display: 'flex', alignItems: 'center', padding: '0 16px', gap: 16, flexShrink: 0, minWidth: 0,
   }}>
     <IconBtn onClick={onToggleSidebar} title="Свернуть"><Icon name="layers" size={18} /></IconBtn>
 
-    {/* Breadcrumb — allowed to shrink / truncate */}
+    {/* Breadcrumb */}
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, flex: '1 1 auto', minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' }}>
-      {project ? (
-        <>
-          <span onClick={onBackToPortfolio} style={{ color: 'var(--muted-foreground)', flexShrink: 0, cursor: 'pointer' }}>Портфель</span>
-          <Icon name="chevron-right" size={14} />
-          <span style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>{project}</span>
-        </>
-      ) : (
-        <span style={{ fontWeight: 500 }}>Обзор портфеля</span>
-      )}
+      {crumbs.map((c, i) => (
+        <React.Fragment key={i}>
+          {i > 0 && <Icon name="chevron-right" size={14} />}
+          {c.onClick
+            ? <span onClick={c.onClick} style={{ color: 'var(--muted-foreground)', flexShrink: 0, cursor: 'pointer' }}>{c.label}</span>
+            : <span style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.label}</span>
+          }
+        </React.Fragment>
+      ))}
     </div>
 
-    {/* Right-hand controls — fixed, non-shrinking group */}
+    {/* Right-hand controls */}
     <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
       <div style={{ position: 'relative'}}>
         <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted-foreground)', pointerEvents: 'none', display: 'flex' }}>

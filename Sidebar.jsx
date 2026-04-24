@@ -1,33 +1,27 @@
 // Sidebar.jsx
-const Sidebar = ({ active, onNav, collapsed, inProject = false }) => {
-  const item = (key, icon, label, disabled = false) => (
+const Sidebar = ({ active, onNav, collapsed }) => {
+  const item = (key, icon, label) => (
     <div
-      key={key}
-      onClick={() => { if (!disabled) onNav(key); }}
+      onClick={() => onNav(key)}
       style={{
         display: 'flex', alignItems: 'center', gap: 10,
         padding: collapsed ? '8px' : '7px 10px',
         justifyContent: collapsed ? 'center' : 'flex-start',
         borderRadius: 'var(--radius-sm)',
-        color: disabled ? 'var(--muted-foreground)' : 'var(--sidebar-foreground)',
-        fontSize: 14,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
+        color: 'var(--sidebar-foreground)',
+        fontSize: 14, cursor: 'pointer',
         background: active === key ? 'var(--sidebar-accent)' : 'transparent',
         fontWeight: active === key ? 500 : 400,
+        transition: 'background .12s',
       }}
-      onMouseEnter={e => { if (!disabled && active !== key) e.currentTarget.style.background = 'var(--sidebar-accent)'; }}
+      onMouseEnter={e => { if (active !== key) e.currentTarget.style.background = 'var(--sidebar-accent)'; }}
       onMouseLeave={e => { if (active !== key) e.currentTarget.style.background = 'transparent'; }}
     >
-      <span style={{ color: active === key ? 'var(--primary)' : 'var(--muted-foreground)', display: 'flex' }}>
+      <span style={{ color: active === key ? 'var(--primary)' : 'var(--muted-foreground)', display: 'flex', flexShrink: 0 }}>
         <Icon name={icon} size={16} />
       </span>
-      {!collapsed && label}
+      {!collapsed && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>}
     </div>
-  );
-
-  const section = (title) => !collapsed && (
-    <div style={{ fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 600, color: 'var(--muted-foreground)', padding: '14px 10px 6px' }}>{title}</div>
   );
 
   return (
@@ -41,8 +35,9 @@ const Sidebar = ({ active, onNav, collapsed, inProject = false }) => {
       transition: 'width .2s',
       display: 'flex',
       flexDirection: 'column',
+      gap: 2,
     }}>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '4px 6px 16px', color: 'var(--foreground)' }}>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '4px 6px 16px', color: 'var(--foreground)', flexShrink: 0 }}>
         <svg width="28" height="28" viewBox="0 0 48 48" style={{ flexShrink: 0 }}>
           <circle cx="18" cy="24" r="14" fill="none" stroke="currentColor" strokeWidth="2.5" />
           <circle cx="30" cy="24" r="14" fill="none" stroke="var(--primary)" strokeWidth="2.5" />
@@ -50,18 +45,10 @@ const Sidebar = ({ active, onNav, collapsed, inProject = false }) => {
         {!collapsed && <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 18, letterSpacing: '0.04em' }}>STRATUM</span>}
       </div>
 
-      {section('Портфель')}
-      {item('overview', 'home', 'Обзор')}
-
-      {section('Проект')}
-      {item('model', 'box', '3D-модель', !inProject)}
-      {item('registry', 'table', 'Реестр объектов', !inProject)}
-      {item('telemetry', 'activity', 'Телеметрия', !inProject)}
-
-      {section('Анализ')}
-      {item('deviations', 'alert-circle', 'Расхождения', !inProject)}
-      {item('versions', 'layers', 'Версии модели', !inProject)}
-      {item('docs', 'file-text', 'Документы', !inProject)}
+      {item('overview',    'home',     'Обзор')}
+      {item('projects',    'folder',   'Проекты')}
+      {item('contractors', 'users',    'Подрядчики')}
+      {item('telemetry',   'activity', 'Телеметрия')}
 
       <div style={{ flex: 1 }} />
       {item('settings', 'settings', 'Настройки')}
