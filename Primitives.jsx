@@ -49,6 +49,11 @@ const LUCIDE = {
   'play':           '<polygon points="5 3 19 12 5 21 5 3"/>',
   'upload':         '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/>',
   'image':          '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
+  'send':           '<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
+  'bot':            '<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/>',
+  'sidebar-close':  '<path d="M3 3v18"/><path d="m16 6-6 6 6 6"/>',
+  'sidebar-open':   '<path d="M3 3v18"/><path d="m8 6 6 6-6 6"/>',
+  'bar-chart':      '<path d="M18 20V10M12 20V4M6 20v-6"/>',
 };
 
 // shadcn/ui Button — variants: default, secondary, outline, ghost, destructive, link

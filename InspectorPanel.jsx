@@ -120,10 +120,162 @@ const InspectorPanel = ({ selected, onClose }) => {
   const data = MOCK_PROPS[selected];
 
   if (!data) {
+    const PROJECT = {
+      name: 'ЭЛОУ-АВТ-6 · Блок 2',
+      client: 'ПАО «Нефтехим-Волга»',
+      phase: 'Текущая · v2.14',
+      date: 'Апр 2026',
+      progress: 68,
+      daysLeft: 62,
+      status: 'warn',
+    };
+
+    const PROJ_DEVS = [
+      { tag: 'E-4401', text: 'Трещина в сварном шве',    date: '23.04', kind: 'crit' },
+      { tag: 'V-1208', text: 'Толщина стенки −0,8 мм',   date: '12.03', kind: 'warn' },
+      { tag: 'V-1208', text: 'Смещение по оси X +45 мм', date: '08.03', kind: 'warn' },
+    ];
+
+    const PROJ_EVENTS = [
+      { date: '23.04', kind: 'crit', text: 'Зафиксирована трещина E-4401',  author: 'Система' },
+      { date: '12.03', kind: 'warn', text: 'Расхождение толщины стенки V-1208', author: 'Петров Д.К.' },
+      { date: '01.02', kind: 'ok',   text: 'BIM-модель обновлена: v1.3→v1.4', author: 'BIM-отдел' },
+      { date: '14.01', kind: 'ok',   text: 'Импорт IFC завершён',           author: 'Импорт' },
+    ];
+
+    const TEAM = [
+      { name: 'Иванов А.В.',  role: 'BIM-менеджер' },
+      { name: 'Петров Д.К.',  role: 'Контроль качества' },
+      { name: 'ПКБ-3',        role: 'Проектный институт' },
+    ];
+
+    const Sec = ({ label }) => (
+      <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.13em', textTransform: 'uppercase',
+        color: 'var(--muted-foreground)', marginBottom: 10 }}>{label}</div>
+    );
+
     return (
-      <aside style={{ width: 320, background: 'var(--card)', borderLeft: '1px solid var(--border)', padding: 24, flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-        <div style={{ color: 'var(--muted-foreground)', fontSize: 13, lineHeight: 1.5 }}>
-          Выберите элемент на модели — здесь появятся его свойства, документы и история изменений.
+      <aside style={{ width: 320, background: 'var(--card)', borderLeft: '1px solid var(--border)',
+        flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+        {/* ── Project header ─────────────────────────────────────── */}
+        <div style={{ padding: '18px 20px 16px', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.13em', textTransform: 'uppercase',
+            color: 'var(--muted-foreground)', marginBottom: 4 }}>Проект</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, lineHeight: 1.2 }}>{PROJECT.name}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted-foreground)', marginTop: 3 }}>{PROJECT.client}</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 }}>
+            <Badge variant="warn" uppercase><StatusDot kind="warn" />Внимание</Badge>
+            <span style={{ fontSize: 11, color: 'var(--muted-foreground)', fontFamily: 'var(--font-mono)' }}>
+              {PROJECT.phase} · {PROJECT.date}
+            </span>
+          </div>
+        </div>
+
+        <div style={{ flex: 1, overflow: 'auto' }}>
+
+          {/* ── Progress ─────────────────────────────────────────── */}
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+              <Sec label="Готовность BIM-модели" />
+              <span style={{ fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--foreground)' }}>
+                {PROJECT.progress}%
+              </span>
+            </div>
+            <div style={{ height: 6, background: 'var(--muted)', borderRadius: 3, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${PROJECT.progress}%`, borderRadius: 3,
+                background: 'var(--primary)', transition: 'width .4s ease' }}/>
+            </div>
+            <div style={{ marginTop: 6, fontSize: 11, color: 'var(--muted-foreground)', fontFamily: 'var(--font-mono)' }}>
+              Этап 5 из 8 · Оборудование смонтировано
+            </div>
+          </div>
+
+          {/* ── KPI grid ─────────────────────────────────────────── */}
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)',
+            display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {[
+              { val: '4',  label: 'Объекта в модели', color: 'var(--foreground)' },
+              { val: '9',  label: 'Документов',        color: 'var(--foreground)' },
+              { val: '3',  label: 'Отклонения',        color: 'var(--status-warn)' },
+              { val: `${PROJECT.daysLeft}д`, label: 'До пуска', color: 'var(--primary)' },
+            ].map(({ val, label, color }) => (
+              <div key={label} style={{ padding: '10px 12px', background: 'var(--background)',
+                borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+                <div style={{ fontSize: 20, fontWeight: 700, fontFamily: 'var(--font-mono)',
+                  color, lineHeight: 1 }}>{val}</div>
+                <div style={{ fontSize: 11, color: 'var(--muted-foreground)', marginTop: 4 }}>{label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Active deviations ────────────────────────────────── */}
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
+            <Sec label="Активные отклонения" />
+            {PROJ_DEVS.map((d, i) => {
+              const crit = d.kind === 'crit';
+              return (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 10px',
+                  borderRadius: 'var(--radius)', marginBottom: 6,
+                  border: `1px solid ${crit ? 'color-mix(in oklch, var(--status-crit) 38%, transparent)' : 'var(--border)'}`,
+                  background: crit ? 'color-mix(in oklch, var(--status-crit) 5%, transparent)' : 'var(--background)',
+                }}>
+                  <div style={{ marginTop: 3, flexShrink: 0 }}><StatusDot kind={d.kind} size={8} /></div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: crit ? 600 : 400, lineHeight: 1.3 }}>{d.text}</div>
+                    <div style={{ fontSize: 10, color: 'var(--muted-foreground)', marginTop: 2, fontFamily: 'var(--font-mono)' }}>
+                      {d.tag} · {d.date}.2026
+                    </div>
+                  </div>
+                  {crit && <Badge variant="crit" uppercase style={{ flexShrink: 0 }}>Крит.</Badge>}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* ── Recent events ────────────────────────────────────── */}
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
+            <Sec label="Последние события" />
+            {PROJ_EVENTS.map((e, i) => (
+              <div key={i} style={{ display: 'flex', gap: 10, position: 'relative' }}>
+                {i < PROJ_EVENTS.length - 1 && (
+                  <div style={{ position: 'absolute', left: 5, top: 16, bottom: 0, width: 1, background: 'var(--border)' }}/>
+                )}
+                <div style={{ flexShrink: 0, marginTop: 3, zIndex: 1 }}><StatusDot kind={e.kind} size={11} /></div>
+                <div style={{ paddingBottom: 14, flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, lineHeight: 1.4 }}>{e.text}</div>
+                  <div style={{ fontSize: 10, color: 'var(--muted-foreground)', marginTop: 2,
+                    fontFamily: 'var(--font-mono)' }}>{e.date}.2026 · {e.author}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Team ─────────────────────────────────────────────── */}
+          <div style={{ padding: '16px 20px' }}>
+            <Sec label="Ответственные" />
+            {TEAM.map((m, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--muted)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 11, fontWeight: 700, color: 'var(--muted-foreground)', flexShrink: 0 }}>
+                  {m.name[0]}
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 500 }}>{m.name}</div>
+                  <div style={{ fontSize: 11, color: 'var(--muted-foreground)' }}>{m.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+
+        {/* ── Footer ───────────────────────────────────────────────── */}
+        <div style={{ padding: 16, borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
+          <Button variant="outline" size="sm" style={{ flex: 1 }}><Icon name="file-text" size={14} />Паспорт</Button>
+          <Button variant="primary" size="sm" style={{ flex: 1 }}>Карточка проекта</Button>
         </div>
       </aside>
     );
