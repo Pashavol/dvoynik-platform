@@ -523,13 +523,14 @@ const ViewerCanvas = ({ selected, onSelect }) => {
         )}
       </>}
 
-      {/* ── 2D / P&ID overlays ───────────────────────────────────────────── */}
-      {viewMode === '2D'   && <Viewer2D  selected={selected} onSelect={onSelect} phase={phase} onPhaseChange={setPhase} />}
-      {viewMode === 'P&ID' && <ViewerPID selected={selected} onSelect={onSelect} phase={phase} onPhaseChange={setPhase} />}
+      {/* ── 2D / P&ID / Camera overlays ──────────────────────────────────── */}
+      {viewMode === '2D'     && <Viewer2D     selected={selected} onSelect={onSelect} phase={phase} onPhaseChange={setPhase} />}
+      {viewMode === 'P&ID'   && <ViewerPID    selected={selected} onSelect={onSelect} phase={phase} onPhaseChange={setPhase} />}
+      {viewMode === 'Камера' && <ViewerCamera />}
 
       {/* ── View mode buttons — always on top ────────────────────────────── */}
       <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 20, display: 'flex', gap: 4 }}>
-        {['2D', '3D', 'P&ID'].map(v => (
+        {['2D', '3D', 'P&ID', 'Камера'].map(v => (
           <button key={v} onClick={() => setViewMode(v)} style={{
             height: 30, padding: '0 10px', borderRadius: 'var(--radius)',
             border: '1px solid rgba(255,255,255,0.15)',

@@ -46,6 +46,11 @@
   .maplibregl-ctrl-group button:hover { background: var(--accent) !important; }
   .dark .maplibregl-ctrl-icon { filter: invert(1) !important; }
   .maplibregl-ctrl-attrib { display: none !important; }
+
+  @keyframes typing-dot {
+    0%, 60%, 100% { transform: translateY(0);    opacity: .4; }
+    30%           { transform: translateY(-4px);  opacity: 1;  }
+  }
 </style>
 </head>
 <body>
@@ -57,6 +62,8 @@
 <script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
 <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script type="module" src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script type="text/babel" src="Primitives.jsx"></script>
 <script type="text/babel" src="Sidebar.jsx"></script>
@@ -64,6 +71,7 @@
 <script type="text/babel" src="KpiStrip.jsx"></script>
 <script type="text/babel" src="Viewer2D.jsx"></script>
 <script type="text/babel" src="ViewerPID.jsx"></script>
+<script type="text/babel" src="ViewerCamera.jsx"></script>
 <script type="text/babel" src="ViewerCanvas.jsx"></script>
 <script type="text/babel" src="InspectorPanel.jsx"></script>
 <script type="text/babel" src="AssetRegistry.jsx"></script>
@@ -73,6 +81,7 @@
 <script type="text/babel" src="BudgetPage.jsx"></script>
 <script type="text/babel" src="TelemetryPage.jsx"></script>
 <script type="text/babel" src="MediaPage.jsx"></script>
+<script type="text/babel" src="AnalyticsPage.jsx"></script>
 <script type="text/babel" src="Shell.jsx"></script>
 <script type="text/babel" data-presets="react">
   ReactDOM.createRoot(document.getElementById('root')).render(<Shell />);

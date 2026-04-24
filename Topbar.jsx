@@ -14,12 +14,14 @@ const ThemeToggle = () => {
   );
 };
 
-const Topbar = ({ crumbs = [], onToggleSidebar }) => (
+const Topbar = ({ crumbs = [], onToggleSidebar, collapsed }) => (
   <header style={{
     height: 56, background: 'var(--background)', borderBottom: '1px solid var(--border)',
     display: 'flex', alignItems: 'center', padding: '0 16px', gap: 16, flexShrink: 0, minWidth: 0,
   }}>
-    <IconBtn onClick={onToggleSidebar} title="Свернуть"><Icon name="layers" size={18} /></IconBtn>
+    <IconBtn onClick={onToggleSidebar} title={collapsed ? 'Развернуть' : 'Свернуть'}>
+      <Icon name={collapsed ? 'sidebar-open' : 'sidebar-close'} size={18} />
+    </IconBtn>
 
     {/* Breadcrumb */}
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, flex: '1 1 auto', minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap' }}>

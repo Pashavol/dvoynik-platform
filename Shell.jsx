@@ -164,6 +164,7 @@ const Shell = () => {
       return [{ label: 'Подрядчики', onClick: () => navigate('contractors') }, { label: c ? c.name : '…' }];
     }
     if (page === 'telemetry')    return [{ label: 'Телеметрия' }];
+    if (page === 'analytics')    return [{ label: 'Аналитика' }];
     if (page === 'settings')     return [{ label: 'Настройки' }];
     return [{ label: page }];
   })();
@@ -172,7 +173,7 @@ const Shell = () => {
     <div style={{ height: '100vh', display: 'flex', background: 'var(--background)', color: 'var(--foreground)', overflow: 'hidden' }}>
       <Sidebar active={sidebarActive} onNav={navigate} collapsed={collapsed} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <Topbar crumbs={crumbs} onToggleSidebar={() => setCollapsed(c => !c)} />
+        <Topbar crumbs={crumbs} onToggleSidebar={() => setCollapsed(c => !c)} collapsed={collapsed} />
 
         {page === 'overview' && <Portfolio onOpenProject={openProject} />}
 
@@ -195,7 +196,8 @@ const Shell = () => {
           <ContractorsPage contractorId={contractorId} onSelect={null} />
         )}
 
-        {page === 'telemetry' && <TelemetryPage />}
+        {page === 'telemetry'  && <TelemetryPage />}
+        {page === 'analytics'  && <AnalyticsPage />}
 
         {page === 'settings' && (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted-foreground)', fontSize: 14 }}>
