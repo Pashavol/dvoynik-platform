@@ -46,6 +46,7 @@ const AIChatModal = ({ onClose }) => {
   const [typing, setTyping] = useSidebarState(false);
   const bottomRef = useSidebarRef(null);
   const inputRef = useSidebarRef(null);
+  const lottieRef = useSidebarRef(null);
 
   useSidebarEffect(() => {
     if (bottomRef.current) bottomRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -53,6 +54,18 @@ const AIChatModal = ({ onClose }) => {
 
   useSidebarEffect(() => {
     if (inputRef.current) inputRef.current.focus();
+  }, []);
+
+  useSidebarEffect(() => {
+    if (!lottieRef.current) return;
+    const anim = lottie.loadAnimation({
+      container: lottieRef.current,
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+      path: './ai-robot.json',
+    });
+    return () => anim.destroy();
   }, []);
 
   const send = (text) => {
@@ -68,8 +81,6 @@ const AIChatModal = ({ onClose }) => {
   };
 
   const hasMessages = messages.length > 0;
-
-  const LOTTIE = './ai-robot.json';
 
   const modal = (
     <div
@@ -144,12 +155,7 @@ const AIChatModal = ({ onClose }) => {
                 background: 'color-mix(in oklch, var(--primary) 4%, transparent)',
                 borderBottom: '1px solid var(--border)',
               }}>
-                <lottie-player
-                  src={LOTTIE}
-                  autoplay=""
-                  loop=""
-                  style={{ width: 140, height: 130, pointerEvents: 'none' }}
-                />
+                <div ref={lottieRef} style={{ width: 140, height: 130, pointerEvents: 'none' }} />
                 <div style={{ fontWeight: 700, fontSize: 18, marginTop: 2 }}>Чем могу помочь?</div>
                 <div style={{ fontSize: 12, color: 'var(--muted-foreground)', marginTop: 5, textAlign: 'center', lineHeight: 1.6 }}>
                   Задайте вопрос по проекту<br />
