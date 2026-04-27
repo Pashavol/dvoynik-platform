@@ -69,7 +69,7 @@ const AIChatModal = ({ onClose }) => {
 
   const hasMessages = messages.length > 0;
 
-  const LOTTIE = '../../assets/Ai%20Robot%20Vector%20Art.lottie';
+  const LOTTIE = './Ai%20Robot%20Vector%20Art.lottie';
 
   const modal = (
     <div
@@ -360,15 +360,135 @@ const AIChatModal = ({ onClose }) => {
   return ReactDOM.createPortal(modal, document.body);
 };
 
+/* ── Bottom navigation (mobile) ─────────────────────────────── */
+const BottomNav = ({ active, onNav }) => {
+  const [moreOpen, setMoreOpen] = useSidebarState(false);
+
+  const MAIN = [
+    { key: 'overview',  icon: 'home',           label: 'Обзор'     },
+    { key: 'projects',  icon: 'folder',          label: 'Проекты'   },
+    { key: 'tasks',     icon: 'check-square',    label: 'Задачи'    },
+    { key: 'chat',      icon: 'message-square',  label: 'Сообщения' },
+  ];
+
+  const MORE = [
+    { key: 'documents',   icon: 'file-text',  label: 'Документооборот' },
+    { key: 'contractors', icon: 'users',       label: 'Подрядчики'      },
+    { key: 'telemetry',   icon: 'activity',   label: 'Телеметрия'      },
+    { key: 'analytics',   icon: 'bar-chart',  label: 'Аналитика'       },
+    { key: 'settings',    icon: 'settings',   label: 'Настройки'       },
+  ];
+
+  const moreActive = MORE.some(i => i.key === active);
+
+  return ReactDOM.createPortal(
+    <>
+      {moreOpen && (
+        <div
+          onClick={() => setMoreOpen(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 150, background: 'rgba(0,0,0,0.48)' }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              position: 'absolute', bottom: 64, left: 0, right: 0,
+              background: 'var(--sidebar)',
+              borderTop: '1px solid var(--sidebar-border)',
+              borderRadius: '16px 16px 0 0',
+              padding: '12px 16px 24px',
+            }}
+          >
+            <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--border)', margin: '0 auto 20px' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {MORE.map(it => (
+                <button
+                  key={it.key}
+                  onClick={() => { onNav(it.key); setMoreOpen(false); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 14,
+                    padding: '12px 14px', borderRadius: 'var(--radius)',
+                    background: active === it.key ? 'var(--sidebar-accent)' : 'transparent',
+                    border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%',
+                    color: active === it.key ? 'var(--primary)' : 'var(--foreground)',
+                  }}
+                >
+                  <span style={{ color: active === it.key ? 'var(--primary)' : 'var(--muted-foreground)', display: 'flex', flexShrink: 0 }}>
+                    <Icon name={it.icon} size={20} />
+                  </span>
+                  <span style={{ fontSize: 14, fontWeight: active === it.key ? 600 : 400 }}>{it.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <nav style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100,
+        height: 64,
+        background: 'var(--sidebar)',
+        borderTop: '1px solid var(--sidebar-border)',
+        display: 'flex', alignItems: 'stretch',
+      }}>
+        {MAIN.map(it => (
+          <button
+            key={it.key}
+            onClick={() => onNav(it.key)}
+            style={{
+              flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+              justifyContent: 'center', gap: 3,
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: active === it.key ? 'var(--primary)' : 'var(--muted-foreground)',
+              fontSize: 10, fontWeight: active === it.key ? 600 : 400,
+              transition: 'color .12s', padding: '8px 0',
+            }}
+          >
+            <Icon name={it.icon} size={22} />
+            <span>{it.label}</span>
+          </button>
+        ))}
+        <button
+          onClick={() => setMoreOpen(o => !o)}
+          style={{
+            flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', gap: 3,
+            background: moreOpen ? 'var(--sidebar-accent)' : 'none', border: 'none', cursor: 'pointer',
+            color: moreActive || moreOpen ? 'var(--primary)' : 'var(--muted-foreground)',
+            fontSize: 10, fontWeight: moreActive || moreOpen ? 600 : 400,
+            transition: 'color .12s', padding: '8px 0',
+          }}
+        >
+          <Icon name="more" size={22} />
+          <span>Ещё</span>
+        </button>
+      </nav>
+    </>,
+    document.body
+  );
+};
+
 /* ── Sidebar ────────────────────────────────────────────────── */
-const Sidebar = ({ active, onNav, collapsed }) => {
-  const [aiOpen, setAiOpen] = useSidebarState(false);
+const Sidebar = ({ active, onNav, collapsed, isMobile }) => {
+  const [aiOpen,          setAiOpen]          = useSidebarState(false);
+  const [telemetryUnread, setTelemetryUnread] = useSidebarState(0);
+
+  useSidebarEffect(() => {
+    const handler = () => setTelemetryUnread(window.TELEMETRY_UNREAD || 0);
+    window.addEventListener('telemetry-update', handler);
+    return () => window.removeEventListener('telemetry-update', handler);
+  }, []);
 
   const LOTTIE = '../../assets/Ai%20Robot%20Vector%20Art.lottie';
 
-  const item = (key, icon, label) => (
+  const item = (key, icon, label, badge = 0) => (
     <div
-      onClick={() => onNav(key)}
+      onClick={() => {
+        onNav(key);
+        if (key === 'telemetry' && (window.TELEMETRY_UNREAD || 0) > 0) {
+          window.TELEMETRY_UNREAD = 0;
+          setTelemetryUnread(0);
+        }
+      }}
       style={{
         display: 'flex', alignItems: 'center', gap: 10,
         padding: collapsed ? '8px' : '7px 10px',
@@ -379,16 +499,40 @@ const Sidebar = ({ active, onNav, collapsed }) => {
         background: active === key ? 'var(--sidebar-accent)' : 'transparent',
         fontWeight: active === key ? 500 : 400,
         transition: 'background .12s',
+        position: 'relative',
       }}
       onMouseEnter={e => { if (active !== key) e.currentTarget.style.background = 'var(--sidebar-accent)'; }}
       onMouseLeave={e => { if (active !== key) e.currentTarget.style.background = 'transparent'; }}
     >
-      <span style={{ color: active === key ? 'var(--primary)' : 'var(--muted-foreground)', display: 'flex', flexShrink: 0 }}>
+      <span style={{ color: active === key ? 'var(--primary)' : 'var(--muted-foreground)', display: 'flex', flexShrink: 0, position: 'relative' }}>
         <Icon name={icon} size={16} />
+        {collapsed && badge > 0 && (
+          <span style={{
+            position: 'absolute', top: -3, right: -3,
+            width: 8, height: 8, borderRadius: '50%',
+            background: 'var(--primary)', border: '1.5px solid var(--sidebar)',
+          }} />
+        )}
       </span>
-      {!collapsed && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>}
+      {!collapsed && <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>}
+      {!collapsed && badge > 0 && (
+        <span style={{
+          minWidth: 18, height: 18, borderRadius: 9, padding: '0 5px',
+          background: 'var(--primary)', color: 'var(--primary-foreground)',
+          fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>{badge}</span>
+      )}
     </div>
   );
+
+  if (isMobile) {
+    return (
+      <>
+        <BottomNav active={active} onNav={onNav} />
+        {aiOpen && <AIChatModal onClose={() => setAiOpen(false)} />}
+      </>
+    );
+  }
 
   return (
     <aside style={{
@@ -411,11 +555,30 @@ const Sidebar = ({ active, onNav, collapsed }) => {
         {!collapsed && <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 18, letterSpacing: '0.04em' }}>STRATUM</span>}
       </div>
 
-      {item('overview',    'home',     'Обзор')}
-      {item('projects',    'folder',   'Проекты')}
-      {item('contractors', 'users',    'Подрядчики')}
-      {item('telemetry',   'activity',   'Телеметрия')}
-      {item('analytics',   'bar-chart',  'Аналитика')}
+      {item('overview',    'home',           'Обзор')}
+      {item('projects',    'folder',         'Проекты')}
+      {item('tasks',       'check-square',   'Задачи', window.TASKS_OPEN_COUNT || 0)}
+      {item('chat',        'message-square', 'Сообщения', window.CHAT_TOTAL_UNREAD || 0)}
+      {item('documents',   'file-text',      'Документооборот')}
+      {item('contractors', 'users',          'Подрядчики')}
+      {item('telemetry',   'activity',       'Телеметрия', telemetryUnread)}
+      {item('analytics',   'bar-chart',      'Аналитика')}
+      {item('whatif',      'sparkles',       'What-if')}
+
+      <div style={{
+        fontSize: 10, fontWeight: 600, letterSpacing: '0.1em',
+        textTransform: 'uppercase', color: 'var(--muted-foreground)',
+        padding: collapsed ? '12px 0 4px' : '12px 6px 4px',
+        overflow: 'hidden',
+        textAlign: collapsed ? 'center' : 'left',
+        flexShrink: 0,
+      }}>
+        {collapsed
+          ? <span style={{ display: 'block', height: 1, background: 'var(--sidebar-border)', margin: '0 4px' }} />
+          : 'Администрирование'}
+      </div>
+      {item('ontology',  'share-2',  'Онтология')}
+      {item('settings',  'settings', 'Настройки')}
 
       <div style={{ flex: 1 }} />
 
@@ -510,8 +673,6 @@ const Sidebar = ({ active, onNav, collapsed }) => {
           </div>
         </div>
       )}
-
-      {item('settings', 'settings', 'Настройки')}
 
       {/* Modal */}
       {aiOpen && <AIChatModal onClose={() => setAiOpen(false)} />}

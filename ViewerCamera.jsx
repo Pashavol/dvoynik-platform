@@ -1,12 +1,18 @@
 // ViewerCamera.jsx — Multi-camera industrial surveillance view
 
+// ─── ВИДЕОФАЙЛЫ КАМЕР ────────────────────────────────────────────────────────
+// Положите файлы в папку: project/ui_kits/platform/media/
+// Укажите путь в поле src, например: src: 'media/cam01.mp4'
+// Поле poster (необязательно) — кадр-превью для стрипа до начала воспроизведения.
+// Если src пуст — отображается встроенная SVG-заглушка.
+// ─────────────────────────────────────────────────────────────────────────────
 const CAMS = [
-  { id: 'CAM-01', label: 'Обзор · Башня-A',  sub: 'Азимут 135° · +28 м', alert: false },
-  { id: 'CAM-02', label: 'Колонна V-1208',    sub: 'Уровень +12,4 м',     alert: true  },
-  { id: 'CAM-03', label: 'Т/О E-4401',        sub: 'Земля · Север',       alert: true  },
-  { id: 'CAM-04', label: 'Насосная P-2340',   sub: 'Земля · Восток',      alert: false },
-  { id: 'CAM-05', label: 'БПЛА · Аэро',       sub: '+82 м · Зенит',       alert: false },
-  { id: 'CAM-06', label: 'КПП · Въезд',       sub: 'Периметр · Запад',    alert: false },
+  { id: 'CAM-01', label: 'Обзор · Башня-A',  sub: 'Азимут 135° · +28 м', alert: false, src: 'media/cam-1.mp4', poster: '' },
+  { id: 'CAM-02', label: 'Колонна V-1208',    sub: 'Уровень +12,4 м',     alert: true,  src: 'media/cam-2.mp4', poster: '' },
+  { id: 'CAM-03', label: 'Т/О E-4401',        sub: 'Земля · Север',       alert: true,  src: 'media/cam-3.mp4', poster: '' },
+  { id: 'CAM-04', label: 'Насосная P-2340',   sub: 'Земля · Восток',      alert: false, src: 'media/cam-4.mp4', poster: '' },
+  { id: 'CAM-05', label: 'БПЛА · Аэро',       sub: '+82 м · Зенит',       alert: false, src: 'media/cam-5.mp4', poster: '' },
+  { id: 'CAM-06', label: 'КПП · Въезд',       sub: 'Периметр · Запад',    alert: false, src: 'media/cam-6.mp4', poster: '' },
 ];
 
 // ── Individual camera scene SVG ───────────────────────────────────────────────
@@ -356,6 +362,26 @@ const CamScene = ({ index }) => {
   );
 };
 
+// ── CamFeed: real video or SVG fallback ───────────────────────────────────────
+const CamFeed = ({ cam, index, thumb = false }) => {
+  const fill = { width: '100%', height: '100%', objectFit: 'cover', display: 'block' };
+  if (cam.src) {
+    return (
+      <video
+        key={cam.src}
+        src={cam.src}
+        poster={cam.poster || undefined}
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={fill}
+      />
+    );
+  }
+  return <CamScene index={index} />;
+};
+
 // ── ViewerCamera ──────────────────────────────────────────────────────────────
 const ViewerCamera = () => {
   const [active, setActive] = React.useState(0);
@@ -377,7 +403,7 @@ const ViewerCamera = () => {
 
         {/* ── Primary feed ─────────────────────────────────────────── */}
         <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#080b12' }}>
-          <CamScene index={active} />
+          <CamFeed cam={CAMS[active]} index={active} />
 
           {/* Scanlines */}
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 2,
@@ -447,9 +473,9 @@ const ViewerCamera = () => {
               outline: i === active ? '1.5px solid rgba(59,130,246,0.65)' : '1.5px solid rgba(255,255,255,0.04)',
               transition: 'outline .15s',
             }}>
-              {/* Thumbnail — SVG fills 16:10 frame with slice */}
+              {/* Thumbnail — video or SVG fills 16:10 frame with slice */}
               <div style={{ height: 88, overflow: 'hidden', background: '#080b14' }}>
-                <CamScene index={i} />
+                <CamFeed cam={cam} index={i} thumb />
               </div>
               {/* Scanlines on thumb */}
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 88, pointerEvents: 'none',

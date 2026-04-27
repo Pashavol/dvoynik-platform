@@ -113,8 +113,9 @@ const DocBadge = ({ type }) => {
   );
 };
 
-const InspectorPanel = ({ selected, onClose }) => {
+const InspectorPanel = ({ selected, onClose, onOpenCard }) => {
   const [tab, setTab] = useInspectorState('props');
+  const [passportOpen, setPassportOpen] = useInspectorState(false);
   useInspectorEffect(() => { setTab('props'); }, [selected]);
 
   const data = MOCK_PROPS[selected];
@@ -156,7 +157,7 @@ const InspectorPanel = ({ selected, onClose }) => {
 
     return (
       <aside style={{ width: 320, background: 'var(--card)', borderLeft: '1px solid var(--border)',
-        flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
 
         {/* ── Project header ─────────────────────────────────────── */}
         <div style={{ padding: '18px 20px 16px', borderBottom: '1px solid var(--border)' }}>
@@ -274,9 +275,56 @@ const InspectorPanel = ({ selected, onClose }) => {
 
         {/* ── Footer ───────────────────────────────────────────────── */}
         <div style={{ padding: 16, borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
-          <Button variant="outline" size="sm" style={{ flex: 1 }}><Icon name="file-text" size={14} />Паспорт</Button>
-          <Button variant="primary" size="sm" style={{ flex: 1 }}>Карточка проекта</Button>
+          <Button variant="outline" size="sm" style={{ flex: 1 }} onClick={() => setPassportOpen(true)}>
+            <Icon name="file-text" size={14} />Паспорт
+          </Button>
+          <Button variant="primary" size="sm" style={{ flex: 1 }} onClick={() => onOpenCard && onOpenCard()}>
+            Карточка проекта
+          </Button>
         </div>
+
+        {/* ── Passport modal ───────────────────────────────────────── */}
+        {passportOpen && (
+          <div style={{
+            position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)',
+            display: 'flex', alignItems: 'flex-end', zIndex: 100,
+          }} onClick={() => setPassportOpen(false)}>
+            <div style={{
+              background: 'var(--card)', width: '100%', borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
+              padding: '20px 20px 28px', boxShadow: 'var(--shadow-lg)',
+            }} onClick={e => e.stopPropagation()}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Icon name="file-text" size={16} />
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15 }}>Паспорт проекта</span>
+                </div>
+                <IconBtn onClick={() => setPassportOpen(false)}><Icon name="x" size={15} /></IconBtn>
+              </div>
+              {[
+                ['Наименование',   'ЭЛОУ-АВТ-6 · Блок 2'],
+                ['Заказчик',       'ПАО «Нефтехим-Волга»'],
+                ['Генподрядчик',   'ООО «СтройКомплекс»'],
+                ['Шифр проекта',   'НХВ-2340-ЭЛОУ'],
+                ['Стадия',         'Рабочая документация'],
+                ['BIM-стандарт',   'ГОСТ Р 10.0.02-2021'],
+                ['Версия модели',  'v2.14 от 22.04.2026'],
+                ['Дата ввода',     'Июнь 2026 (план)'],
+              ].map(([k, v]) => (
+                <div key={k} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+                  padding: '7px 0', borderBottom: '1px solid var(--border)', fontSize: 13,
+                }}>
+                  <span style={{ color: 'var(--muted-foreground)', flexShrink: 0, marginRight: 12 }}>{k}</span>
+                  <span style={{ fontWeight: 500, textAlign: 'right' }}>{v}</span>
+                </div>
+              ))}
+              <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
+                <Button variant="outline" size="sm" style={{ flex: 1 }}><Icon name="download" size={13} />Скачать PDF</Button>
+                <Button variant="primary" size="sm" style={{ flex: 1 }} onClick={() => setPassportOpen(false)}>Закрыть</Button>
+              </div>
+            </div>
+          </div>
+        )}
       </aside>
     );
   }
@@ -288,7 +336,7 @@ const InspectorPanel = ({ selected, onClose }) => {
   ];
 
   return (
-    <aside style={{ width: 320, background: 'var(--card)', borderLeft: '1px solid var(--border)', flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <aside style={{ width: 320, background: 'var(--card)', borderLeft: '1px solid var(--border)', flexShrink: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
 
       {/* Header */}
       <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
@@ -405,9 +453,73 @@ const InspectorPanel = ({ selected, onClose }) => {
 
       {/* Footer */}
       <div style={{ padding: 16, borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
-        <Button variant="outline" size="sm" style={{ flex: 1 }}><Icon name="file-text" size={14} />Паспорт</Button>
-        <Button variant="primary" size="sm" style={{ flex: 1 }}>Открыть карточку</Button>
+        <Button variant="outline" size="sm" style={{ flex: 1 }} onClick={() => setPassportOpen(true)}>
+          <Icon name="file-text" size={14} />Паспорт
+        </Button>
+        <Button variant="primary" size="sm" style={{ flex: 1 }} onClick={() => onOpenCard && onOpenCard()}>
+          Открыть карточку
+        </Button>
       </div>
+
+      {/* Object passport modal */}
+      {passportOpen && (() => {
+        const passportDoc = data.docs.find(d => d.name.toLowerCase().includes('паспорт'));
+        return (
+          <div style={{
+            position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)',
+            display: 'flex', alignItems: 'flex-end', zIndex: 100,
+          }} onClick={() => setPassportOpen(false)}>
+            <div style={{
+              background: 'var(--card)', width: '100%', borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
+              padding: '20px 20px 28px', boxShadow: 'var(--shadow-lg)',
+            }} onClick={e => e.stopPropagation()}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Icon name="file-text" size={16} />
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15 }}>
+                    Паспорт оборудования
+                  </span>
+                </div>
+                <IconBtn onClick={() => setPassportOpen(false)}><Icon name="x" size={15} /></IconBtn>
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--muted-foreground)', marginBottom: 12,
+                fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Badge variant={data.status} uppercase>
+                  <StatusDot kind={data.status} />
+                  {data.status === 'ok' ? 'Активен' : data.status === 'warn' ? 'Внимание' : data.status === 'crit' ? 'Проблема' : 'Офлайн'}
+                </Badge>
+                <span>{data.type} · {data.name}</span>
+              </div>
+              {data.props.map(([k, v]) => (
+                <div key={k} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
+                  padding: '7px 0', borderBottom: '1px solid var(--border)', fontSize: 13,
+                }}>
+                  <span style={{ color: 'var(--muted-foreground)', flexShrink: 0, marginRight: 12 }}>{k}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 500, textAlign: 'right' }}>{v}</span>
+                </div>
+              ))}
+              {passportDoc && (
+                <div style={{ marginTop: 12, padding: '10px 12px', background: 'var(--background)',
+                  borderRadius: 'var(--radius)', border: '1px solid var(--border)',
+                  display: 'flex', alignItems: 'center', gap: 10, fontSize: 12 }}>
+                  <DocBadge type="PDF" />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{passportDoc.name}</div>
+                    <div style={{ color: 'var(--muted-foreground)', marginTop: 2, fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+                      {passportDoc.date} · {passportDoc.author} · {passportDoc.size}
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
+                <Button variant="outline" size="sm" style={{ flex: 1 }}><Icon name="download" size={13} />Скачать PDF</Button>
+                <Button variant="primary" size="sm" style={{ flex: 1 }} onClick={() => setPassportOpen(false)}>Закрыть</Button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </aside>
   );
 };

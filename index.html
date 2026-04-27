@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Двойник — Operator Console</title>
 <script>
   (function () {
@@ -51,6 +52,16 @@
     0%, 60%, 100% { transform: translateY(0);    opacity: .4; }
     30%           { transform: translateY(-4px);  opacity: 1;  }
   }
+
+  @keyframes tel-slide-in {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes live-pulse {
+    0%, 100% { opacity: 1;   transform: scale(1); }
+    50%      { opacity: 0.3; transform: scale(0.8); }
+  }
 </style>
 </head>
 <body>
@@ -66,6 +77,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script type="text/babel" src="Primitives.jsx"></script>
+<script type="text/babel" src="ProjectGraph.jsx"></script>
 <script type="text/babel" src="Sidebar.jsx"></script>
 <script type="text/babel" src="Topbar.jsx"></script>
 <script type="text/babel" src="KpiStrip.jsx"></script>
@@ -78,10 +90,20 @@
 <script type="text/babel" src="Portfolio.jsx"></script>
 <script type="text/babel" src="ContractorsPage.jsx"></script>
 <script type="text/babel" src="TeamPage.jsx"></script>
+<script type="text/babel" src="BrigadesPage.jsx"></script>
 <script type="text/babel" src="BudgetPage.jsx"></script>
+<script type="text/babel" src="GanttPage.jsx"></script>
 <script type="text/babel" src="TelemetryPage.jsx"></script>
 <script type="text/babel" src="MediaPage.jsx"></script>
 <script type="text/babel" src="AnalyticsPage.jsx"></script>
+<script type="text/babel" src="WhatIfPage.jsx"></script>
+<script type="text/babel" src="ChatPage.jsx"></script>
+<script type="text/babel" src="TasksPage.jsx"></script>
+<script type="text/babel" src="DocumentsPage.jsx"></script>
+<script type="text/babel" src="OntologyPage.jsx"></script>
+<script type="text/babel" src="NotificationsPage.jsx"></script>
+<script type="text/babel" src="SettingsPage.jsx"></script>
+<script type="text/babel" src="UserProfilePage.jsx"></script>
 <script type="text/babel" src="Shell.jsx"></script>
 <script type="text/babel" data-presets="react">
   ReactDOM.createRoot(document.getElementById('root')).render(<Shell />);

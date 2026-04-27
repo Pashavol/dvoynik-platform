@@ -109,10 +109,12 @@ const ContractorList = ({ contractors, onSelect }) => (
 const ContractorCard = ({ contractor: c }) => {
   const [tab, setTab] = React.useState('profile');
   const projects = (window.PROJECTS || []).filter(p => c.projectIds.includes(p.id));
+  const brigades = (window.BRIGADES || []).filter(b => b.contractorId === c.id);
 
   const TABS = [
     { key: 'profile',  label: 'Профиль' },
     { key: 'projects', label: 'Проекты (' + c.projectIds.length + ')' },
+    { key: 'brigades', label: 'Бригады (' + brigades.length + ')' },
     { key: 'docs',     label: 'Документы (' + c.docs.length + ')' },
   ];
 
@@ -205,6 +207,113 @@ const ContractorCard = ({ contractor: c }) => {
               </Badge>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Бригады */}
+      {tab === 'brigades' && (
+        <div style={{ maxWidth: 760 }}>
+          {brigades.length === 0 ? (
+            <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--muted-foreground)', fontSize: 14 }}>
+              Бригады не назначены
+            </div>
+          ) : brigades.map(b => {
+            const statusLabel = { active: 'Работает', upcoming: 'Предстоит', completed: 'Завершена' }[b.status] || b.status;
+            const statusKind  = { active: 'ok', upcoming: 'warn', completed: 'inactive' }[b.status] || 'ok';
+            const totalPeople = b.workers.length + 1;
+            const camCount    = b.workers.filter(w => w.camera).length;
+            return (
+              <div key={b.id} style={{
+                border: '1px solid var(--border)', borderRadius: 'var(--radius-md)',
+                background: 'var(--card)', marginBottom: 12, overflow: 'hidden',
+              }}>
+                {/* Brigade header */}
+                <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: 14 }}>{b.name}</div>
+                      <div style={{ fontSize: 12, color: 'var(--muted-foreground)', marginTop: 2 }}>{b.specialty}</div>
+                    </div>
+                    <Badge variant={statusKind} uppercase>
+                      <StatusDot kind={statusKind} />{statusLabel}
+                    </Badge>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px 16px', fontSize: 12, color: 'var(--muted-foreground)' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Icon name="map-pin" size={11} />{b.zone}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Icon name="calendar" size={11} />{b.startDate} — {b.endDate}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Icon name="users" size={11} />{totalPeople} чел.
+                    </span>
+                    {camCount > 0 && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <Icon name="video" size={11} />{camCount} камер
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {/* People list */}
+                <div style={{ padding: '6px 8px 10px' }}>
+                  {/* Foreman */}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10, padding: '7px 10px',
+                    borderRadius: 6, borderLeft: '2px solid var(--primary)',
+                    background: 'color-mix(in oklch, var(--primary) 5%, transparent)', marginBottom: 2,
+                  }}>
+                    <div style={{
+                      width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+                      background: 'color-mix(in oklch, oklch(0.55 0.16 ' + b.foreman.hue + ') 14%, var(--card))',
+                      border: '1.5px solid oklch(0.55 0.16 ' + b.foreman.hue + ')',
+                      color: 'oklch(0.55 0.16 ' + b.foreman.hue + ')',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 9, fontWeight: 700, fontFamily: 'var(--font-display)',
+                    }}>{b.foreman.initials}</div>
+                    <span style={{ fontSize: 13, fontWeight: 600, flex: 1 }}>{b.foreman.name}</span>
+                    <span style={{
+                      fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase',
+                      padding: '1px 6px', borderRadius: 999,
+                      background: 'color-mix(in oklch, var(--primary) 14%, transparent)', color: 'var(--primary)',
+                    }}>Бригадир</span>
+                  </div>
+                  {/* Workers */}
+                  {b.workers.map(w => (
+                    <div key={w.id} style={{
+                      display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px',
+                      borderRadius: 6, borderLeft: '2px solid transparent',
+                    }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'var(--accent)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <div style={{
+                        width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+                        background: 'color-mix(in oklch, oklch(0.55 0.16 ' + w.hue + ') 14%, var(--card))',
+                        border: '1.5px solid oklch(0.55 0.16 ' + w.hue + ')',
+                        color: 'oklch(0.55 0.16 ' + w.hue + ')',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 9, fontWeight: 700, fontFamily: 'var(--font-display)',
+                      }}>{w.initials}</div>
+                      <span style={{ fontSize: 13, flex: 1 }}>{w.name}</span>
+                      <span style={{ fontSize: 11, color: 'var(--muted-foreground)' }}>{w.role}</span>
+                      {w.camera && (
+                        <span style={{
+                          display: 'flex', alignItems: 'center', gap: 3,
+                          fontSize: 10, fontWeight: 600, letterSpacing: '0.06em',
+                          padding: '1px 6px', borderRadius: 999,
+                          background: 'color-mix(in oklch, var(--status-ok) 12%, transparent)',
+                          color: 'var(--status-ok)',
+                        }}>
+                          <Icon name="video" size={10} />КАМЕРА
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 

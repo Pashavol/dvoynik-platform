@@ -66,7 +66,7 @@ const ProgressLineChart = () => {
   useAE(() => {
     if (!cv.current || !window.Chart) return;
     if (ch.current) ch.current.destroy();
-    const d = dark = _dark(), s = mkScl(d);
+    const d = _dark(), s = mkScl(d);
     ch.current = new window.Chart(cv.current, {
       type: 'line',
       data: {
@@ -316,11 +316,337 @@ const ContractorsChart = () => {
   return <CW h={210} cref={cv} />;
 };
 
+/* ─── Portfolio: All Projects Progress ──────────────────────── */
+const AllProjectsProgressChart = () => {
+  const cv = useAR(null), ch = useAR(null);
+  const projects = window.PROJECTS || [];
+  useAE(() => {
+    if (!cv.current || !window.Chart) return;
+    if (ch.current) ch.current.destroy();
+    const d = _dark(), s = mkScl(d);
+    const labels = projects.map(p => p.name.length > 22 ? p.name.slice(0, 22) + '…' : p.name);
+    const data   = projects.map(p => p.progress || 0);
+    const solid  = projects.map(p => p.status === 'crit' ? '#ef4444' : p.status === 'warn' ? '#f59e0b' : p.status === 'done' ? '#94a3b8' : '#3b82f6');
+    const alpha  = projects.map(p => p.status === 'crit' ? 'rgba(239,68,68,0.18)' : p.status === 'warn' ? 'rgba(245,158,11,0.18)' : p.status === 'done' ? 'rgba(148,163,184,0.18)' : 'rgba(59,130,246,0.18)');
+    const valPlugin = {
+      id: 'progressVals',
+      afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        chart.getDatasetMeta(0).data.forEach((bar, idx) => {
+          ctx.save();
+          ctx.fillStyle = solid[idx];
+          ctx.font = '600 11px Inter, system-ui, sans-serif';
+          ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+          ctx.fillText(data[idx] + '%', bar.x + 6, bar.y);
+          ctx.restore();
+        });
+      },
+    };
+    ch.current = new window.Chart(cv.current, {
+      type: 'bar',
+      plugins: [valPlugin],
+      data: { labels, datasets: [{ data, backgroundColor: alpha, borderColor: solid, borderWidth: 1.5, borderRadius: 5, borderSkipped: false }] },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        animation: { duration: 700, easing: 'easeInOutCubic' },
+        plugins: {
+          legend: { display: false },
+          tooltip: { ...mkTip(d), callbacks: { label: c => ` Готовность: ${c.raw}%` } },
+        },
+        scales: {
+          x: { ...s, min: 0, max: 115, ticks: { color: _tc(d), font: { size: 11 }, callback: v => v <= 100 ? v + '%' : '' } },
+          y: { ...s, grid: { display: false } },
+        },
+      },
+    });
+    return () => { ch.current && ch.current.destroy(); ch.current = null; };
+  }, []);
+  return <CW h={Math.max(160, projects.length * 44 + 40)} cref={cv} />;
+};
+
+/* ─── Portfolio: Budget by Project ──────────────────────────── */
+const AllProjectsBudgetChart = () => {
+  const cv = useAR(null), ch = useAR(null);
+  useAE(() => {
+    if (!cv.current || !window.Chart) return;
+    if (ch.current) ch.current.destroy();
+    const d = _dark(), s = mkScl(d);
+    const projects = (window.PROJECTS || []).slice(0, 6);
+    const labels   = projects.map(p => p.name.length > 18 ? p.name.slice(0, 18) + '…' : p.name);
+    const planData = [1.80, 2.40, 0.95, 3.10, 1.45, 2.20].slice(0, projects.length);
+    const factData = [1.24, 1.87, 0.68, 1.45, 0.90, 1.12].slice(0, projects.length);
+    ch.current = new window.Chart(cv.current, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          { label: 'План, млрд ₽', data: planData, backgroundColor: 'rgba(59,130,246,0.15)', borderColor: '#3b82f6', borderWidth: 1.5, borderRadius: 5, borderSkipped: false },
+          { label: 'Факт, млрд ₽', data: factData, backgroundColor: '#3b82f6', borderRadius: 5, borderSkipped: false },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation: { duration: 700, easing: 'easeInOutCubic' },
+        plugins: {
+          legend: mkLeg(d),
+          tooltip: { ...mkTip(d), callbacks: { label: c => ` ${c.dataset.label}: ${c.raw} млрд` } },
+        },
+        scales: {
+          x: s,
+          y: { ...s, ticks: { color: _tc(d), font: { size: 11 }, callback: v => v + ' B' } },
+        },
+      },
+    });
+    return () => { ch.current && ch.current.destroy(); ch.current = null; };
+  }, []);
+  return <CW h={248} cref={cv} />;
+};
+
+/* ─── Portfolio: Status donut by project count ───────────────── */
+const PortfolioStatusChart = () => {
+  const cv = useAR(null), ch = useAR(null);
+  useAE(() => {
+    if (!cv.current || !window.Chart) return;
+    if (ch.current) ch.current.destroy();
+    const d = _dark();
+    const projects = window.PROJECTS || [];
+    const ok   = projects.filter(p => p.status === 'ok').length;
+    const warn = projects.filter(p => p.status === 'warn').length;
+    const crit = projects.filter(p => p.status === 'crit').length;
+    const done = projects.filter(p => p.status === 'done').length;
+    const total = projects.length;
+    const centerPlugin = {
+      id: 'centerText',
+      afterDraw(chart) {
+        const meta = chart.getDatasetMeta(0);
+        if (!meta || !meta.data || !meta.data[0]) return;
+        const cx = meta.data[0].x, cy = meta.data[0].y;
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = 'bold 24px Inter, system-ui, sans-serif';
+        ctx.fillStyle = _fg(d); ctx.fillText(total, cx, cy - 10);
+        ctx.font = '11px Inter, system-ui, sans-serif';
+        ctx.fillStyle = _tc(d); ctx.fillText('проектов', cx, cy + 11);
+        ctx.restore();
+      },
+    };
+    ch.current = new window.Chart(cv.current, {
+      type: 'doughnut',
+      plugins: [centerPlugin],
+      data: {
+        labels: ['Норма','Внимание','Критично','Завершён'],
+        datasets: [{ data: [ok || 0, warn || 0, crit || 0, done || 0], backgroundColor: ['#22c55e','#f59e0b','#ef4444','#94a3b8'], borderWidth: 3, borderColor: _bg(d), hoverOffset: 5 }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '68%',
+        animation: { duration: 700, easing: 'easeInOutCubic' },
+        plugins: {
+          legend: mkLeg(d, 'bottom'),
+          tooltip: { ...mkTip(d), callbacks: { label: c => ` ${c.label}: ${c.raw} пр.` } },
+        },
+      },
+    });
+    return () => { ch.current && ch.current.destroy(); ch.current = null; };
+  }, []);
+  return <CW h={248} cref={cv} />;
+};
+
+/* ─── Portfolio: Risks by Project ───────────────────────────── */
+const AllProjectsRisksChart = () => {
+  const cv = useAR(null), ch = useAR(null);
+  useAE(() => {
+    if (!cv.current || !window.Chart) return;
+    if (ch.current) ch.current.destroy();
+    const d = _dark(), s = mkScl(d);
+    const projects = window.PROJECTS || [];
+    const labels = projects.map(p => p.name.length > 20 ? p.name.slice(0, 20) + '…' : p.name);
+    const data   = projects.map(p => p.risks || 0);
+    const solid  = data.map(v => v >= 3 ? '#ef4444' : v >= 1 ? '#f59e0b' : '#22c55e');
+    const alpha  = data.map(v => v >= 3 ? 'rgba(239,68,68,0.2)' : v >= 1 ? 'rgba(245,158,11,0.2)' : 'rgba(34,197,94,0.2)');
+    ch.current = new window.Chart(cv.current, {
+      type: 'bar',
+      data: { labels, datasets: [{ data, backgroundColor: alpha, borderColor: solid, borderWidth: 1.5, borderRadius: 5, borderSkipped: false }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation: { duration: 700, easing: 'easeInOutCubic' },
+        plugins: {
+          legend: { display: false },
+          tooltip: { ...mkTip(d), callbacks: { label: c => ` Рисков: ${c.raw}` } },
+        },
+        scales: {
+          x: s,
+          y: { ...s, min: 0, ticks: { color: _tc(d), font: { size: 11 }, stepSize: 1, callback: v => Number.isInteger(v) ? v : '' } },
+        },
+      },
+    });
+    return () => { ch.current && ch.current.destroy(); ch.current = null; };
+  }, []);
+  return <CW h={200} cref={cv} />;
+};
+
+/* ─── Chart 7 · Portfolio monthly burn rate (stacked bar) ───── */
+const PortfolioBurnRateChart = () => {
+  const cv = useAR(null), ch = useAR(null);
+  useAE(() => {
+    if (!cv.current || !window.Chart) return;
+    if (ch.current) ch.current.destroy();
+    const d = _dark(), s = mkScl(d);
+    ch.current = new window.Chart(cv.current, {
+      type: 'bar',
+      data: {
+        labels: ['Авг','Сен','Окт','Ноя','Дек','Янв','Фев','Мар','Апр'],
+        datasets: [
+          { label: 'ЭЛОУ-АВТ-6',        data: [0.18,0.22,0.31,0.28,0.35,0.41,0.38,0.44,0.42], backgroundColor: 'rgba(59,130,246,0.80)',  borderRadius: 0, borderSkipped: false },
+          { label: 'НПУ-3',              data: [0.12,0.15,0.19,0.21,0.24,0.27,0.23,0.31,0.29], backgroundColor: 'rgba(34,197,94,0.80)',   borderRadius: 0, borderSkipped: false },
+          { label: 'Резервуарный парк',  data: [0.08,0.09,0.12,0.11,0.14,0.16,0.18,0.19,0.21], backgroundColor: 'rgba(245,158,11,0.80)',  borderRadius: 0, borderSkipped: false },
+          { label: 'Прочие',             data: [0.05,0.07,0.08,0.09,0.10,0.11,0.13,0.14,0.15], backgroundColor: 'rgba(148,163,184,0.55)', borderRadius: 5, borderSkipped: false },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation: { duration: 700, easing: 'easeInOutCubic' },
+        plugins: {
+          legend: mkLeg(d),
+          tooltip: { ...mkTip(d), callbacks: { label: c => ` ${c.dataset.label}: ${c.raw.toFixed(2)} млрд ₽` } },
+        },
+        scales: {
+          x: { ...s, stacked: true },
+          y: { ...s, stacked: true, ticks: { color: _tc(d), font: { size: 11 }, callback: v => v.toFixed(1) + ' B' } },
+        },
+      },
+    });
+    return () => { ch.current && ch.current.destroy(); ch.current = null; };
+  }, []);
+  return <CW h={248} cref={cv} />;
+};
+
+/* ─── Chart 8 · Workforce on site (line + plan) ─────────────── */
+const WorkforceChart = () => {
+  const cv = useAR(null), ch = useAR(null);
+  useAE(() => {
+    if (!cv.current || !window.Chart) return;
+    if (ch.current) ch.current.destroy();
+    const d = _dark(), s = mkScl(d);
+    ch.current = new window.Chart(cv.current, {
+      type: 'line',
+      data: {
+        labels: ['Авг','Сен','Окт','Ноя','Дек','Янв','Фев','Мар','Апр'],
+        datasets: [
+          {
+            label: 'Факт',
+            data: [840, 920, 1050, 1180, 1240, 1310, 1280, 1420, 1380],
+            borderColor: '#8b5cf6', borderWidth: 2.5,
+            fill: true, tension: 0.42,
+            backgroundColor: (ctx) => {
+              const c = ctx.chart;
+              if (!c.chartArea) return 'rgba(139,92,246,0.1)';
+              const g = c.ctx.createLinearGradient(0, c.chartArea.top, 0, c.chartArea.bottom);
+              g.addColorStop(0, 'rgba(139,92,246,0.25)');
+              g.addColorStop(1, 'rgba(139,92,246,0.01)');
+              return g;
+            },
+            pointRadius: 4, pointHoverRadius: 6,
+            pointBackgroundColor: '#8b5cf6', pointBorderColor: _ptb(d), pointBorderWidth: 2,
+          },
+          {
+            label: 'План',
+            data: [900, 980, 1100, 1220, 1280, 1360, 1360, 1460, 1460],
+            borderColor: '#94a3b8', borderDash: [6, 4], borderWidth: 1.5,
+            fill: false, tension: 0.42, pointRadius: 0, pointHoverRadius: 4,
+          },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation: { duration: 700, easing: 'easeInOutCubic' },
+        plugins: {
+          legend: mkLeg(d),
+          tooltip: { ...mkTip(d), callbacks: { label: c => ` ${c.dataset.label}: ${c.raw} чел.` } },
+        },
+        scales: {
+          x: s,
+          y: { ...s, ticks: { color: _tc(d), font: { size: 11 }, callback: v => v } },
+        },
+      },
+    });
+    return () => { ch.current && ch.current.destroy(); ch.current = null; };
+  }, []);
+  return <CW h={248} cref={cv} />;
+};
+
+/* ─── Chart 9 · Days to deadline per project ────────────────── */
+const ProjectDeadlinesChart = () => {
+  const cv = useAR(null), ch = useAR(null);
+  useAE(() => {
+    if (!cv.current || !window.Chart) return;
+    if (ch.current) ch.current.destroy();
+    const d = _dark(), s = mkScl(d);
+    const projects = window.PROJECTS || [];
+    const labels = projects.map(p => p.name.length > 22 ? p.name.slice(0, 22) + '…' : p.name);
+    const MOCK_DAYS = [62, 128, 245, 310, 45, 180, 90, 200];
+    const days   = projects.map((_, i) => MOCK_DAYS[i] || 120);
+    const solid  = days.map(v => v < 60 ? '#ef4444' : v < 120 ? '#f59e0b' : '#3b82f6');
+    const alpha  = days.map(v => v < 60 ? 'rgba(239,68,68,0.18)' : v < 120 ? 'rgba(245,158,11,0.18)' : 'rgba(59,130,246,0.18)');
+    const valPlugin = {
+      id: 'daysVals',
+      afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        chart.getDatasetMeta(0).data.forEach((bar, idx) => {
+          ctx.save();
+          ctx.fillStyle = solid[idx];
+          ctx.font = '600 11px Inter, system-ui, sans-serif';
+          ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+          ctx.fillText(days[idx] + ' дн.', bar.x + 6, bar.y);
+          ctx.restore();
+        });
+      },
+    };
+    ch.current = new window.Chart(cv.current, {
+      type: 'bar',
+      plugins: [valPlugin],
+      data: { labels, datasets: [{ data: days, backgroundColor: alpha, borderColor: solid, borderWidth: 1.5, borderRadius: 5, borderSkipped: false }] },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false,
+        animation: { duration: 700, easing: 'easeInOutCubic' },
+        plugins: {
+          legend: { display: false },
+          tooltip: { ...mkTip(d), callbacks: { label: c => ` До сдачи: ${c.raw} дней` } },
+        },
+        scales: {
+          x: { ...s, min: 0, max: 380, ticks: { color: _tc(d), font: { size: 11 }, callback: v => v + ' дн.' } },
+          y: { ...s, grid: { display: false } },
+        },
+      },
+    });
+    return () => { ch.current && ch.current.destroy(); ch.current = null; };
+  }, []);
+  return <CW h={Math.max(160, ((window.PROJECTS || []).length) * 44 + 40)} cref={cv} />;
+};
+
 /* ─── Period tabs ────────────────────────────────────────────── */
 const PERIODS = ['7 дней','Месяц','Квартал','Год'];
 
-/* ─── Page ───────────────────────────────────────────────────── */
-const AnalyticsPage = () => {
+const PeriodSwitcher = ({ period, setPeriod }) => (
+  <div style={{ display: 'flex', gap: 2, background: 'var(--muted)', borderRadius: 'var(--radius-sm)', padding: 3 }}>
+    {PERIODS.map(p => (
+      <button key={p} onClick={() => setPeriod(p)} style={{
+        padding: '5px 14px', border: 'none', cursor: 'pointer',
+        borderRadius: 'calc(var(--radius-sm) - 2px)',
+        background: period === p ? 'var(--card)' : 'transparent',
+        color: period === p ? 'var(--foreground)' : 'var(--muted-foreground)',
+        fontSize: 12, fontWeight: period === p ? 500 : 400,
+        boxShadow: period === p ? 'var(--shadow-sm)' : 'none',
+        transition: 'all .12s',
+      }}>{p}</button>
+    ))}
+  </div>
+);
+
+/* ─── Per-project analytics tab (карточка проекта) ──────────── */
+const ProjectAnalyticsTab = () => {
   const [period, setPeriod] = useAS('Месяц');
   return (
     <div style={{ flex: 1, overflow: 'auto', padding: '24px 24px 36px', minHeight: 0 }}>
@@ -331,19 +657,7 @@ const AnalyticsPage = () => {
           <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22 }}>Аналитика</div>
           <div style={{ fontSize: 13, color: 'var(--muted-foreground)', marginTop: 3 }}>ЭЛОУ-АВТ-6 · Блок 2 · Апрель 2026</div>
         </div>
-        <div style={{ display: 'flex', gap: 2, background: 'var(--muted)', borderRadius: 'var(--radius-sm)', padding: 3 }}>
-          {PERIODS.map(p => (
-            <button key={p} onClick={() => setPeriod(p)} style={{
-              padding: '5px 14px', border: 'none', cursor: 'pointer',
-              borderRadius: 'calc(var(--radius-sm) - 2px)',
-              background: period === p ? 'var(--card)' : 'transparent',
-              color: period === p ? 'var(--foreground)' : 'var(--muted-foreground)',
-              fontSize: 12, fontWeight: period === p ? 500 : 400,
-              boxShadow: period === p ? 'var(--shadow-sm)' : 'none',
-              transition: 'all .12s',
-            }}>{p}</button>
-          ))}
-        </div>
+        <PeriodSwitcher period={period} setPeriod={setPeriod} />
       </div>
 
       {/* KPI row */}
@@ -388,4 +702,93 @@ const AnalyticsPage = () => {
   );
 };
 
+/* ─── Portfolio analytics page (раздел Аналитика) ───────────── */
+const AnalyticsPage = () => {
+  const [period, setPeriod] = useAS('Месяц');
+  const projects       = window.PROJECTS || [];
+  const activeProjects = projects.filter(p => p.status !== 'done');
+  const avgProgress    = projects.length
+    ? Math.round(projects.reduce((s, p) => s + (p.progress || 0), 0) / projects.length)
+    : 0;
+  const totalRisks = projects.reduce((s, p) => s + (p.risks || 0), 0);
+  const critCount  = projects.filter(p => p.status === 'crit').length;
+
+  return (
+    <div style={{ flex: 1, overflow: 'auto', padding: '24px 24px 36px', minHeight: 0 }}>
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 22 }}>Аналитика</div>
+          <div style={{ fontSize: 13, color: 'var(--muted-foreground)', marginTop: 3 }}>
+            Портфель проектов · {projects.length} объектов · Апрель 2026
+          </div>
+        </div>
+        <PeriodSwitcher period={period} setPeriod={setPeriod} />
+      </div>
+
+      {/* Portfolio KPIs */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 12 }}>
+        <KPI icon="layers"
+             label="Проектов в портфеле"
+             value={projects.length}
+             sub={`${activeProjects.length} активных`} />
+        <KPI icon="trending-up"
+             label="Ср. готовность"
+             value={avgProgress + '%'}
+             trend="+3%" trendUp={true}
+             sub="за месяц" />
+        <KPI icon="dollar-sign"
+             label="Общий бюджет"
+             value="₽ 9.3 млрд"
+             sub="освоено 5.6 млрд · 60%" />
+        <KPI icon="alert-triangle"
+             label="Активных рисков"
+             value={totalRisks}
+             vc={critCount > 0 ? 'var(--status-crit)' : totalRisks > 0 ? 'var(--status-warn)' : undefined}
+             sub={`${critCount} критических`} />
+      </div>
+
+      {/* Row 1 · Progress by project + Status donut */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 10, marginBottom: 10 }}>
+        <CC title="Готовность по проектам" sub="Текущий % завершения в разрезе проектов">
+          <AllProjectsProgressChart />
+        </CC>
+        <CC title="Распределение статусов" sub={`По ${projects.length} проектам портфеля`}>
+          <PortfolioStatusChart />
+        </CC>
+      </div>
+
+      {/* Row 2 · Budget by project + Risks by project */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+        <CC title="Бюджет по проектам" sub="Плановые и фактические показатели, млрд ₽">
+          <AllProjectsBudgetChart />
+        </CC>
+        <CC title="Риски и отклонения по проектам" sub="Количество активных рисков на проект">
+          <AllProjectsRisksChart />
+        </CC>
+      </div>
+
+      {/* Row 3 · Portfolio burn rate + Workforce */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+        <CC title="Динамика освоения портфеля" sub="Ежемесячные расходы в разрезе проектов, млрд ₽">
+          <PortfolioBurnRateChart />
+        </CC>
+        <CC title="Численность на объектах" sub="Факт vs план, чел. суммарно по портфелю">
+          <WorkforceChart />
+        </CC>
+      </div>
+
+      {/* Row 4 · Days to deadline */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}>
+        <CC title="Сроки до сдачи по проектам" sub="Дней до планового окончания · красный < 60, жёлтый < 120">
+          <ProjectDeadlinesChart />
+        </CC>
+      </div>
+
+    </div>
+  );
+};
+
 window.AnalyticsPage = AnalyticsPage;
+window.ProjectAnalyticsTab = ProjectAnalyticsTab;

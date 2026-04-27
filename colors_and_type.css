@@ -48,6 +48,7 @@
   --brand:                 oklch(0.623 0.214 259.815);
   --brand-foreground:      oklch(0.970 0.014 254.604);
   --brand-muted:           oklch(0.932 0.032 255.585); /* blue-100 */
+  --brand-muted-foreground: oklch(0.379 0.146 265.522); /* blue-800 — text on brand-muted bg */
 
   /* --- Status / semantic --- */
   --status-ok:             oklch(0.648 0.150 160.118); /* emerald-600 */
@@ -146,6 +147,7 @@
   --brand:                 oklch(0.546 0.245 262.881);
   --brand-foreground:      oklch(0.985 0 0);
   --brand-muted:           oklch(0.282 0.091 267.935);
+  --brand-muted-foreground: oklch(0.870 0.080 264.376); /* blue-200 — text on dark brand-muted bg */
 
   --chart-1:               oklch(0.646 0.222 41.116);
   --chart-2:               oklch(0.750 0.183 55.934);

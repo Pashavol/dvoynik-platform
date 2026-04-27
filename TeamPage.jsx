@@ -81,8 +81,116 @@ const ROLE_COLORS = {
 const STATUS_LABEL = { active: 'Активен', vacation: 'Отпуск', away: 'Командировка' };
 const STATUS_KIND  = { active: 'ok', vacation: 'warn', away: 'info' };
 
+const TeamMemberModal = ({ member, onClose }) => {
+  const roleStyle  = ROLE_COLORS[member.role] || ROLE_COLORS.doc;
+  const avatarColor = 'oklch(0.50 0.18 ' + member.hue + ')';
+  const avatarBg    = 'color-mix(in oklch, oklch(0.50 0.18 ' + member.hue + ') 16%, var(--card))';
+
+  const events = [
+    { kind: 'ok',   text: 'Согласован раздел спецификации оборудования', time: 'Сегодня, 10:22' },
+    { kind: 'info', text: 'Добавлен комментарий в чат проекта',          time: 'Вчера, 15:40'   },
+    { kind: 'ok',   text: 'Подписан акт освидетельствования скрытых работ', time: '23.04.2026'  },
+  ];
+
+  return (
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, zIndex: 1000,
+      background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(2px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        width: 480, maxWidth: '90vw', background: 'var(--card)',
+        borderRadius: 'var(--radius-md)', border: '1px solid var(--border)',
+        boxShadow: '0 24px 64px rgba(0,0,0,0.45)', overflow: 'hidden',
+      }}>
+        {/* Hero */}
+        <div style={{
+          background: 'linear-gradient(135deg, color-mix(in oklch, ' + avatarColor + ' 10%, var(--card)) 0%, var(--card) 65%)',
+          padding: '20px 20px 18px', position: 'relative',
+        }}>
+          <IconBtn onClick={onClose} style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28 }}>
+            <Icon name="x" size={14} />
+          </IconBtn>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: '50%',
+              background: avatarBg, color: avatarColor,
+              fontSize: 18, fontWeight: 700, fontFamily: 'var(--font-display)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, border: '2px solid ' + avatarColor,
+              boxShadow: '0 0 0 3px var(--card), 0 0 0 5px ' + avatarColor,
+            }}>{member.initials}</div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 16 }}>{member.name}</div>
+              <div style={{ fontSize: 13, color: 'var(--muted-foreground)', marginTop: 2 }}>{member.position}</div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
+                <span style={{
+                  ...roleStyle, fontSize: 11, fontWeight: 600,
+                  letterSpacing: '0.06em', textTransform: 'uppercase',
+                  padding: '2px 8px', borderRadius: 999,
+                }}>{member.roleLabel}</span>
+                <Badge variant={STATUS_KIND[member.status]} uppercase>
+                  <StatusDot kind={STATUS_KIND[member.status]} size={6} />
+                  {STATUS_LABEL[member.status]}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Contact buttons */}
+        <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
+          <Button variant="outline" size="sm" style={{ flex: 1, justifyContent: 'center' }}>
+            <Icon name="phone" size={13} />{member.phone}
+          </Button>
+          <Button variant="outline" size="sm" style={{ flex: 1, justifyContent: 'center' }}>
+            <Icon name="mail" size={13} />{member.email}
+          </Button>
+        </div>
+
+        {/* Info rows */}
+        <div style={{ borderTop: '1px solid var(--border)' }}>
+          {[
+            { icon: 'layers',    label: 'Дисциплина',    value: member.discipline },
+            { icon: 'briefcase', label: 'Организация',   value: member.company    },
+            { icon: 'calendar',  label: 'В проекте с',   value: member.since      },
+          ].map((row, i, arr) => (
+            <div key={row.label} style={{
+              display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px',
+              borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none',
+            }}>
+              <span style={{ color: 'var(--muted-foreground)', display: 'flex', flexShrink: 0 }}>
+                <Icon name={row.icon} size={14} />
+              </span>
+              <span style={{ fontSize: 12, color: 'var(--muted-foreground)', width: 110, flexShrink: 0 }}>{row.label}</span>
+              <span style={{ fontSize: 13, flex: 1 }}>{row.value}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Recent activity */}
+        <div style={{ borderTop: '1px solid var(--border)', padding: '14px 20px' }}>
+          <div style={{ fontSize: 12, color: 'var(--muted-foreground)', fontWeight: 500, marginBottom: 10 }}>Последние события</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {events.map((e, i) => (
+              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                <div style={{ marginTop: 4, flexShrink: 0 }}><StatusDot kind={e.kind} size={7} /></div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 12.5 }}>{e.text}</div>
+                  <div style={{ fontSize: 11, color: 'var(--muted-foreground)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>{e.time}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const TeamPage = () => {
   const [search, setSearch] = React.useState('');
+  const [selectedMember, setSelectedMember] = React.useState(null);
 
   const filtered = TEAM.filter(m =>
     !search || m.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -122,12 +230,14 @@ const TeamPage = () => {
           const avatarBg   = 'color-mix(in oklch, oklch(0.50 0.18 ' + m.hue + ') 16%, var(--card))';
 
           return (
-            <div key={m.id} style={{
-              background: 'var(--card)', border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)', padding: 20,
-              display: 'flex', flexDirection: 'column', gap: 16,
-              transition: 'box-shadow .15s',
-            }}
+            <div key={m.id}
+              onClick={() => setSelectedMember(m)}
+              style={{
+                background: 'var(--card)', border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-md)', padding: 20,
+                display: 'flex', flexDirection: 'column', gap: 16,
+                transition: 'box-shadow .15s', cursor: 'pointer',
+              }}
               onMouseEnter={e => e.currentTarget.style.boxShadow = 'var(--shadow-md)'}
               onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
             >
@@ -187,6 +297,10 @@ const TeamPage = () => {
           );
         })}
       </div>
+
+      {selectedMember && (
+        <TeamMemberModal member={selectedMember} onClose={() => setSelectedMember(null)} />
+      )}
     </div>
   );
 };

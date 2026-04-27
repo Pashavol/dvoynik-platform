@@ -143,10 +143,11 @@ const ProjectMap = ({ projects, onOpenProject }) => {
 };
 
 // ─── KPI card ─────────────────────────────────────────────────────────────────
-const PortfolioKpi = ({ label, value, unit, hint, accent }) => (
+const PortfolioKpi = ({ label, value, unit, hint, accent, style: extraStyle }) => (
   <div style={{
     background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)',
     padding: '16px 18px', flex: 1, minWidth: 0,
+    ...extraStyle,
   }}>
     <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted-foreground)' }}>{label}</div>
     <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 8 }}>
@@ -158,46 +159,67 @@ const PortfolioKpi = ({ label, value, unit, hint, accent }) => (
 );
 
 // ─── Portfolio ────────────────────────────────────────────────────────────────
-const Portfolio = ({ onOpenProject }) => {
+const Portfolio = ({ onOpenProject, onAllRecs }) => {
   const [hovered, setHovered] = React.useState(null);
+  const [viewport, setViewport] = React.useState(() => {
+    const w = window.innerWidth;
+    return w < 640 ? 'mobile' : w < 1024 ? 'tablet' : 'desktop';
+  });
+  React.useEffect(() => {
+    const handler = () => {
+      const w = window.innerWidth;
+      setViewport(w < 640 ? 'mobile' : w < 1024 ? 'tablet' : 'desktop');
+    };
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  const isMobile = viewport === 'mobile';
+  const isTablet  = viewport === 'tablet';
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, background: 'var(--muted)', overflow: 'auto' }}>
 
       {/* Page header */}
-      <div style={{ padding: '24px 24px 16px' }}>
+      <div style={{ padding: isMobile ? '16px 16px 12px' : '24px 24px 16px' }}>
         <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--muted-foreground)' }}>Обзор портфеля</div>
-        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, letterSpacing: '-0.02em', marginTop: 4 }}>Капитальное строительство 2026</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: isMobile ? 22 : 28, letterSpacing: '-0.02em', marginTop: 4 }}>Капитальное строительство 2026</div>
       </div>
 
       {/* KPI widgets */}
-      <div style={{ display: 'flex', gap: 12, padding: '0 24px' }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(5, 1fr)',
+        gap: 12,
+        padding: isMobile ? '0 16px' : '0 24px',
+      }}>
         <PortfolioKpi label="Активные проекты"  value="125"  hint="+4 за квартал" />
         <PortfolioKpi label="Подрядчики"         value="24"   hint="18 активных договоров" />
         <PortfolioKpi label="Бюджет"             value="124"  unit="млрд ₽" hint="освоено 62,4%" />
         <PortfolioKpi label="Эффективность"      value="89"   unit="%" hint="+3 п.п. к плану" accent="var(--status-ok)" />
-        <PortfolioKpi label="Риски"              value="7"    hint="3 критичных" accent="var(--status-warn)" />
+        <PortfolioKpi label="Риски"              value="7"    hint="3 критичных" accent="var(--status-warn)" style={isMobile ? { gridColumn: 'span 2' } : undefined} />
       </div>
 
       {/* AI recommendations */}
-      <div style={{ padding: '20px 24px 0' }}>
+      <div style={{ padding: isMobile ? '16px 16px 0' : '20px 24px 0' }}>
         <div style={{
           background: 'linear-gradient(135deg, color-mix(in oklch, var(--primary) 10%, var(--card)) 0%, var(--card) 55%)',
-          border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 18,
+          border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: isMobile ? 14 : 18,
           position: 'relative', overflow: 'hidden',
         }}>
           <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'color-mix(in oklch, var(--primary) 14%, transparent)', filter: 'blur(40px)', pointerEvents: 'none' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, position: 'relative' }}>
-            <span style={{ width: 32, height: 32, borderRadius: 'var(--radius-sm)', background: 'var(--primary)', color: 'var(--primary-foreground)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: 32, height: 32, borderRadius: 'var(--radius-sm)', background: 'var(--primary)', color: 'var(--primary-foreground)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <Icon name="sparkles" size={16} />
             </span>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15 }}>Рекомендации AI-ассистента</div>
-              <div style={{ fontSize: 12, color: 'var(--muted-foreground)', marginTop: 1 }}>Обновлено сегодня, 09:42 · проанализировано 125 проектов</div>
+              {!isMobile && <div style={{ fontSize: 12, color: 'var(--muted-foreground)', marginTop: 1 }}>Обновлено сегодня, 09:42 · проанализировано 125 проектов</div>}
             </div>
-            <Button variant="outline" size="sm">Все рекомендации<Icon name="arrow-right" size={14} /></Button>
+            <Button variant="outline" size={isMobile ? 'icon' : 'sm'} onClick={onAllRecs}>
+              {isMobile ? <Icon name="arrow-right" size={14} /> : <>Все рекомендации<Icon name="arrow-right" size={14} /></>}
+            </Button>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, position: 'relative' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: 12, position: 'relative' }}>
             {[
               { tag: 'Риск',        tagKind: 'warn', title: 'НПЗ Кстово: отклонение графика на 14 дней',  body: 'Смонтируйте бригаду Б-04 с объекта Ванкор — освобождается 12 апреля, закроет разрыв по монтажу ректификационной колонны.', action: 'Назначить бригаду' },
               { tag: 'Оптимизация', tagKind: 'info', title: 'Ванкорский кластер: экономия 340 млн ₽',     body: 'Замена поставщика Ду-1200 трубопровода на АО «ТМК» — срок поставки короче на 6 нед., стоимость ниже на 8,2%.', action: 'Открыть спецификацию' },
@@ -217,28 +239,30 @@ const Portfolio = ({ onOpenProject }) => {
       </div>
 
       {/* Map + projects list */}
-      <div style={{ display: 'flex', gap: 16, padding: 24, flex: 1, minHeight: 0 }}>
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 16, padding: isMobile ? 16 : 24, flex: 1, minHeight: 0 }}>
 
         {/* Map card */}
-        <div style={{ flex: 1, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 20, display: 'flex', flexDirection: 'column', minHeight: 520 }}>
+        <div style={{ flex: 1, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: isMobile ? 14 : 20, display: 'flex', flexDirection: 'column', minHeight: isMobile ? 260 : 520 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexShrink: 0 }}>
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16 }}>География проектов</div>
-              <div style={{ fontSize: 12, color: 'var(--muted-foreground)', marginTop: 2 }}>Нажмите на маркер, чтобы открыть карточку проекта</div>
+              {!isMobile && <div style={{ fontSize: 12, color: 'var(--muted-foreground)', marginTop: 2 }}>Нажмите на маркер, чтобы открыть карточку проекта</div>}
             </div>
-            <div style={{ display: 'flex', gap: 14, fontSize: 12 }}>
-              {[['ok','В норме'],['warn','Внимание'],['crit','Авария'],['inactive','Завершён']].map(([k, label]) => (
-                <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--muted-foreground)' }}>
-                  <StatusDot kind={k} size={8} />{label}
-                </span>
-              ))}
-            </div>
+            {!isMobile && (
+              <div style={{ display: 'flex', gap: 14, fontSize: 12 }}>
+                {[['ok','В норме'],['warn','Внимание'],['crit','Авария'],['inactive','Завершён']].map(([k, label]) => (
+                  <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--muted-foreground)' }}>
+                    <StatusDot kind={k} size={8} />{label}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <ProjectMap projects={PROJECTS} onOpenProject={onOpenProject} />
         </div>
 
         {/* Projects list */}
-        <div style={{ width: 340, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 16, display: 'flex', flexDirection: 'column', gap: 8, overflow: 'auto' }}>
+        <div style={{ width: isMobile ? '100%' : isTablet ? 280 : 340, flexShrink: 0, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 16, display: 'flex', flexDirection: 'column', gap: 8, overflow: 'auto' }}>
           <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, padding: '4px 4px 8px' }}>Проекты ({PROJECTS.length})</div>
           {PROJECTS.map(p => (
             <button key={p.id}
