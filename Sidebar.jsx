@@ -69,7 +69,7 @@ const AIChatModal = ({ onClose }) => {
 
   const hasMessages = messages.length > 0;
 
-  const LOTTIE = './ai-robot.lottie';
+  const LOTTIE = './ai-robot.json';
 
   const modal = (
     <div
@@ -144,7 +144,7 @@ const AIChatModal = ({ onClose }) => {
                 background: 'color-mix(in oklch, var(--primary) 4%, transparent)',
                 borderBottom: '1px solid var(--border)',
               }}>
-                <dotlottie-player
+                <lottie-player
                   src={LOTTIE}
                   autoplay=""
                   loop=""
