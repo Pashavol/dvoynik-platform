@@ -484,7 +484,10 @@ const Sidebar = ({ active, onNav, collapsed, isMobile }) => {
     return () => window.removeEventListener('telemetry-update', handler);
   }, []);
 
-  const LOTTIE = '../../assets/Ai%20Robot%20Vector%20Art.lottie';
+  const lottieMount = React.useCallback((node) => {
+    if (!node) return;
+    lottie.loadAnimation({ container: node, renderer: 'svg', loop: true, autoplay: true, path: './ai-robot.json' });
+  }, []);
 
   const item = (key, icon, label, badge = 0) => (
     <div
@@ -603,12 +606,7 @@ const Sidebar = ({ active, onNav, collapsed, isMobile }) => {
           onMouseEnter={e => e.currentTarget.style.background = 'var(--sidebar-accent)'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
         >
-          <dotlottie-player
-            src={LOTTIE}
-            autoplay=""
-            loop=""
-            style={{ width: 34, height: 34, pointerEvents: 'none' }}
-          />
+          <div ref={lottieMount} style={{ width: 34, height: 34, pointerEvents: 'none' }} />
         </div>
       ) : (
         /* Expanded: card with lottie + open button */
@@ -626,12 +624,7 @@ const Sidebar = ({ active, onNav, collapsed, isMobile }) => {
             borderBottom: '1px solid color-mix(in oklch, var(--primary) 14%, var(--border))',
             paddingTop: 4,
           }}>
-            <dotlottie-player
-              src={LOTTIE}
-              autoplay=""
-              loop=""
-              style={{ width: 118, height: 108, pointerEvents: 'none' }}
-            />
+            <div ref={lottieMount} style={{ width: 118, height: 108, pointerEvents: 'none' }} />
           </div>
 
           {/* Title + subtitle */}
