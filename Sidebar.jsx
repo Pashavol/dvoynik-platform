@@ -69,7 +69,7 @@ const AIChatModal = ({ onClose }) => {
 
   const hasMessages = messages.length > 0;
 
-  const LOTTIE = './Ai%20Robot%20Vector%20Art.lottie';
+  const LOTTIE = './ai-robot.lottie';
 
   const modal = (
     <div
